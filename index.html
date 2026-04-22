@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Касса подъезда №1 — Логвиненко 24/1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh}
+.app{max-width:680px;margin:0 auto;padding:16px}
+.screen{display:none}.screen.active{display:block}
+h1{font-size:20px;font-weight:700;margin-bottom:2px}
+.sub{font-size:12px;color:#888}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.metric{background:#fff;border-radius:12px;padding:12px;border:1px solid #e8e8e4;text-align:center}
+.metric-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.metric-value{font-size:15px;font-weight:700}
+.card{background:#fff;border-radius:14px;border:1px solid #e8e8e4;padding:16px;margin-bottom:12px}
+.sec{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tabs{display:flex;border-bottom:1px solid #e8e8e4;margin-bottom:18px;overflow-x:auto}
+.tab{padding:9px 12px;border:none;background:none;cursor:pointer;font-size:13px;color:#999;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-weight:500}
+.tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:700}
+.apt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.apt-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .15s}
+.apt-card:active{background:#f4f4f0;transform:scale(.98)}
+.apt-name{font-size:13px;font-weight:700}
+.apt-owner{font-size:10px;color:#999;margin-top:1px}
+.apt-paid{font-size:11px;color:#555;margin-top:2px}
+.apt-bal{font-size:11px;font-weight:700;margin-top:2px}
+.badge{font-size:10px;padding:3px 7px;border-radius:20px;font-weight:600;white-space:nowrap;text-align:center;line-height:1.4}
+.b-ok{background:#e8f5e9;color:#2e7d32}
+.b-no{background:#fde8e8;color:#c62828}
+.b-over{background:#fff3e0;color:#e65100}
+.tx-item{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid #f0f0ec}
+.tx-item:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tx-info{flex:1}
+.tx-desc{font-size:13px;line-height:1.3}
+.tx-sub{font-size:11px;color:#999;margin-top:2px}
+.tx-amt{font-weight:700;font-size:13px;white-space:nowrap}
+.tx-del{background:none;border:none;cursor:pointer;color:#ddd;font-size:16px;padding:0 2px}
+.tx-del:hover{color:#e53935}
+.fg{flex:1}.fg label{display:block;font-size:11px;color:#666;margin-bottom:3px;font-weight:600}
+.fg input,.fg select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;color:#1a1a1a}
+.form-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-end}
+.btn{padding:9px 16px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#1a1a1a}
+.btn:active{opacity:.8}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.pin-dot{width:48px;height:56px;border:1.5px solid #ddd;border-radius:12px;font-size:28px;font-weight:700;text-align:center;line-height:56px;background:#fff;color:#1a1a1a}
+.pin-dot.filled{border-color:#1a1a1a;background:#f0f0ec}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto}
+.nk{padding:16px;border:1px solid #e8e8e4;border-radius:12px;background:#fff;cursor:pointer;font-size:18px;font-weight:700;color:#1a1a1a;text-align:center;user-select:none}
+.nk:active{background:#f0f0ec}
+.back{background:none;border:none;cursor:pointer;font-size:13px;color:#888;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:20px}
+.back:hover{color:#1a1a1a}
+.avatar{width:48px;height:48px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#1565c0;flex-shrink:0}
+.pay-row{display:flex;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0f0ec;gap:8px}
+.pay-row:last-child{border-bottom:none}
+.pay-info{flex:1}
+.pay-note{font-size:11px;color:#999;margin-top:2px;font-style:italic}
+.pin-err{font-size:13px;color:#c62828;text-align:center;min-height:20px;margin-bottom:10px}
+.report-box{background:#f4f4f0;border-radius:10px;padding:14px;font-size:12px;font-family:monospace;white-space:pre-wrap;line-height:1.9;color:#444;border:1px solid #e0e0dc;margin-top:10px}
+.pin-setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pin-row{display:flex;align-items:center;gap:8px;background:#f9f9f6;border-radius:8px;padding:8px 10px}
+.pin-row label{font-size:12px;color:#666;flex:1;font-weight:600}
+.pin-row input{width:72px;text-align:center;padding:5px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.empty{text-align:center;padding:24px;color:#bbb;font-size:13px}
+.sbox{border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:10px;line-height:1.7}
+.s-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}
+.s-warn{background:#fff3e0;color:#e65100;border:1px solid #ffe0b2}
+.s-bad{background:#fde8e8;color:#c62828;border:1px solid #ffcdd2}
+.s-info{background:#e3f2fd;color:#1565c0;border:1px solid #bbdefb}
+.lv-box{background:#f3e5f5;border:1px solid #ce93d8;border-radius:12px;padding:14px;margin-bottom:16px}
+.lv-title{font-size:10px;font-weight:700;color:#6a1b9a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.lv-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid #e1bee7}
+.lv-row:last-child{border-bottom:none}
+.lv-footer{margin-top:8px;font-size:12px;color:#6a1b9a;font-weight:600;padding-top:8px;border-top:1px solid #e1bee7}
+.debt-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0ec;gap:8px;font-size:13px}
+.debt-row:last-child{border-bottom:none}
+.num-circle{width:28px;height:28px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.loader{text-align:center;padding:20px;color:#888;font-size:13px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:999;display:none}
+@media(max-width:400px){.metrics{grid-template-columns:1fr 1fr}.apt-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="toast" id="toast"></div>
+
+<div id="s-home" class="screen active">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+    <div><h1>Касса подъезда №1</h1><div class="sub">Логвиненко 24/1 · данные с 2017 года</div></div>
+    <button class="btn btn-sm" onclick="go('s-apin')">Старший →</button>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Баланс кассы</div><div class="metric-value" id="h-bal" style="color:#2e7d32">...</div></div>
+    <div class="metric"><div class="metric-label">Расходы новые</div><div class="metric-value" style="color:#c62828" id="h-exp">...</div></div>
+    <div class="metric"><div class="metric-label">Доходы новые</div><div class="metric-value" style="color:#2e7d32" id="h-inc">...</div></div>
+  </div>
+  <div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:12px;padding:14px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Справка — история ТСЖ</div>
+    <div style="font-size:13px;color:#1565c0;line-height:1.6">ТСЖ прекратило работу. Взносы с 2017 по 2024 год собирались по 2 400 с/год с квартиры (норма за 8 лет — 19 200 с). Некоторые квартиры недоплатили, некоторые выполнили ремонтные работы вместо денег — это видно в портфолио каждой квартиры. Сейчас сборы ведутся только на конкретные нужды подъезда.</div>
+  </div>
+  <div class="lv-box">
+    <div class="lv-title">Прочистка ливнёвки — собрано лично Эржаном (не входит в кассу)</div>
+    <div class="lv-row"><span>Кв. 2 — Алимжанова</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 4 — Ни Алла</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 5 — Орозалиева</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 6 — Калмурзаев</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 7 — Делинда</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 8 — Калмурзаев</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 9 — Старков</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span>Кв. 10 — Ачекеев</span><span style="color:#2e7d32;font-weight:700">✓ 350 с</span></div>
+    <div class="lv-row"><span style="color:#c62828;font-weight:600">Кв. 1 — Ураимов</span><span style="color:#c62828;font-weight:700">✗ долг 350 с</span></div>
+    <div class="lv-row"><span style="color:#c62828;font-weight:600">Кв. 3 — Кошелев</span><span style="color:#c62828;font-weight:700">✗ долг 350 с</span></div>
+    <div class="lv-footer">Собрано: 2 800 с из 3 500 с · Долг: 700 с (кв.1 + кв.3)</div>
+  </div>
+  <div class="sec">Портфолио квартир — нажмите для входа</div>
+  <div class="apt-grid" id="home-grid"><div class="loader">Загрузка...</div></div>
+  <div class="card">
+    <div class="sec">Все расходы подъезда</div>
+    <div id="home-txlist"><div class="loader">Загрузка...</div></div>
+  </div>
+</div>
+
+<div id="s-apt-pin" class="screen">
+  <button class="back" onclick="go('s-home')">← Назад</button>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:17px;font-weight:700" id="pin-title">Квартира</div>
+    <div style="font-size:12px;color:#888;margin-top:4px">Введите пин-код</div>
+  </div>
+  <div class="pin-wrap">
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+  <div class="numpad">
+    <button class="nk" onclick="pk('1')">1</button><button class="nk" onclick="pk('2')">2</button><button class="nk" onclick="pk('3')">3</button>
+    <button class="nk" onclick="pk('4')">4</button><button class="nk" onclick="pk('5')">5</button><button class="nk" onclick="pk('6')">6</button>
+    <button class="nk" onclick="pk('7')">7</button><button class="nk" onclick="pk('8')">8</button><button class="nk" onclick="pk('9')">9</button>
+    <button class="nk" onclick="pk('c')" style="font-size:12px;color:#888;font-weight:500">Очист.</button>
+    <button class="nk" onclick="pk('0')">0</button>
+    <button class="nk" onclick="pk('d')" style="font-size:20px">⌫</button>
+  </div>
+</div>
+
+<div id="s-apt-view" class="screen">
+  <button class="back" onclick="go('s-home')">← Назад</button>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <div class="avatar" id="av-ini">К1</div>
+    <div>
+      <div style="font-size:17px;font-weight:700" id="av-title">Квартира 1</div>
+      <div style="font-size:13px;color:#444;font-weight:600;margin-top:1px" id="av-owner"></div>
+      <div style="font-size:11px;color:#888" id="av-addr"></div>
+    </div>
+  </div>
+  <div id="av-metrics" class="metrics" style="grid-template-columns:1fr 1fr 1fr"></div>
+  <div id="av-status-box"></div>
+  <div class="card">
+    <div class="sec">История платежей из книжки ТСЖ</div>
+    <div id="av-paylist"></div>
+  </div>
+  <div class="card">
+    <div class="sec">Расходы подъезда — ваша доля (1/10)</div>
+    <div id="av-explist"></div>
+  </div>
+</div>
+
+<div id="s-apin" class="screen">
+  <button class="back" onclick="go('s-home')">← Назад</button>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:17px;font-weight:700">Вход старшего по подъезду</div>
+    <div style="font-size:12px;color:#888;margin-top:4px">Введите пин-код администратора</div>
+  </div>
+  <div class="pin-wrap">
+    <div class="pin-dot" id="apd0"></div><div class="pin-dot" id="apd1"></div>
+    <div class="pin-dot" id="apd2"></div><div class="pin-dot" id="apd3"></div>
+  </div>
+  <div class="pin-err" id="apin-err"></div>
+  <div class="numpad">
+    <button class="nk" onclick="apk('1')">1</button><button class="nk" onclick="apk('2')">2</button><button class="nk" onclick="apk('3')">3</button>
+    <button class="nk" onclick="apk('4')">4</button><button class="nk" onclick="apk('5')">5</button><button class="nk" onclick="apk('6')">6</button>
+    <button class="nk" onclick="apk('7')">7</button><button class="nk" onclick="apk('8')">8</button><button class="nk" onclick="apk('9')">9</button>
+    <button class="nk" onclick="apk('c')" style="font-size:12px;color:#888;font-weight:500">Очист.</button>
+    <button class="nk" onclick="apk('0')">0</button>
+    <button class="nk" onclick="apk('d')" style="font-size:20px">⌫</button>
+  </div>
+</div>
+
+<div id="s-admin" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><h1>Панель старшего</h1><div class="sub">Эржан · Логвиненко 24/1</div></div>
+    <button class="btn btn-sm" onclick="go('s-home')">Выйти</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="aTab('tx')">Операции</button>
+    <button class="tab" onclick="aTab('pay')">Сборы</button>
+    <button class="tab" onclick="aTab('debt')">Долги ТСЖ</button>
+    <button class="tab" onclick="aTab('pins')">Пин-коды</button>
+    <button class="tab" onclick="aTab('rep')">Отчёт</button>
+  </div>
+  <div id="at-tx">
+    <div class="card">
+      <div class="sec" style="margin-bottom:10px">Добавить операцию</div>
+      <div class="form-row">
+        <div class="fg" style="flex:2"><label>Описание</label><input type="text" id="tx-desc" placeholder="Оплата дворнику..."></div>
+        <div class="fg"><label>Тип</label><select id="tx-type"><option value="expense">Расход</option><option value="income">Взнос/Доход</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Сумма (сом)</label><input type="number" id="tx-amt" placeholder="1000" min="0"></div>
+        <div class="fg"><label>Дата</label><input type="date" id="tx-date"></div>
+        <div class="fg"><label>Категория</label>
+          <select id="tx-cat"><option>Дворник</option><option>Уборка</option><option>Ремонт</option><option>Электрика</option><option>Озеленение</option><option>Налоги</option><option>Бухгалтер</option><option>Взносы жильцов</option><option>Прочее</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Квартира (если взнос)</label><select id="tx-apt"><option value="">— общая операция —</option></select></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="addTx()">Добавить</button></div>
+      </div>
+    </div>
+    <div class="sec">Все операции (<span id="tx-count">0</span>)</div>
+    <div id="admin-txlist"><div class="loader">Загрузка...</div></div>
+  </div>
+  <div id="at-pay" style="display:none">
+    <div class="card">
+      <div class="form-row">
+        <div class="fg" style="max-width:180px"><label>Название сбора</label><input type="text" id="pay-name" placeholder="Ремонт лампочки..."></div>
+        <div class="fg" style="max-width:140px"><label>Сумма (сом/кв.)</label><input type="number" id="fee-inp" value="500" onchange="renderPayGrid()"></div>
+        <div class="fg"><label>Период</label><select id="pay-mon-sel" onchange="renderPayGrid()"></select></div>
+      </div>
+    </div>
+    <div class="apt-grid" id="admin-pay-grid"></div>
+    <div style="margin-top:8px;font-size:12px;color:#888;text-align:right">Сдали: <b id="paid-cnt">0</b>/10</div>
+  </div>
+  <div id="at-debt" style="display:none">
+    <div class="card">
+      <div class="sec" style="margin-bottom:4px">История недоплат в ТСЖ (2017–2024)</div>
+      <div style="font-size:11px;color:#888;margin-bottom:12px">ТСЖ прекратило работу. Данные для справки — кто сколько недоплатил за 8 лет. Норма: 19 200 с/квартира.</div>
+      <div id="debt-list"></div>
+      <div id="debt-summary" style="margin-top:10px;padding-top:10px;border-top:1px solid #e8e8e4;font-size:12px;color:#888"></div>
+    </div>
+  </div>
+  <div id="at-pins" style="display:none">
+    <div class="card">
+      <div class="sec" style="margin-bottom:10px">Пин-коды квартир (4 цифры)</div>
+      <div class="pin-setup-grid" id="pin-setup"></div>
+      <button class="btn btn-primary btn-full" onclick="savePins()">Сохранить пин-коды</button>
+    </div>
+    <div class="card">
+      <div class="sec" style="margin-bottom:8px">Пин-код администратора</div>
+      <div class="form-row" style="align-items:flex-end">
+        <div class="fg" style="max-width:150px"><label>Новый пин (4 цифры)</label><input type="text" id="apin-new" maxlength="4" placeholder="****"></div>
+        <button class="btn" onclick="saveAPin()">Изменить</button>
+      </div>
+    </div>
+  </div>
+  <div id="at-rep" style="display:none">
+    <div class="card">
+      <div class="sec">Отчёт для WhatsApp</div>
+      <button class="btn btn-primary btn-full" onclick="genRep()">Сгенерировать отчёт</button>
+      <div id="rep-out"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+var SUPABASE_URL = 'https://vwayotpdslglhanbkczz.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3YXlvdHBkc2xnbGhhbmJrY3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjM5NTMsImV4cCI6MjA5MjQzOTk1M30.bbmdyfEu5YG1_wj0ijL9yTcJ0B_GNscuuVmhUMfabDk';
+
+// Supabase API helpers
+function sbGet(table, query) {
+  var url = SUPABASE_URL + '/rest/v1/' + table + '?order=date.asc' + (query||'');
+  return fetch(url, {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}}).then(function(r){return r.json();});
+}
+function sbInsert(table, data) {
+  return fetch(SUPABASE_URL+'/rest/v1/'+table, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(data)
+  });
+}
+function sbDelete(table, id) {
+  return fetch(SUPABASE_URL+'/rest/v1/'+table+'?id=eq.'+id, {
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  });
+}
+function sbUpsert(table, data) {
+  return fetch(SUPABASE_URL+'/rest/v1/'+table, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(data)
+  });
+}
+function sbDeleteWhere(table, field, val) {
+  return fetch(SUPABASE_URL+'/rest/v1/'+table+'?'+field+'=eq.'+val, {
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  });
+}
+
+// Static apartment data
+var APT = {
+  1:{owner:'Ураимов М.',addr:'Логвиненко 24/1, кв. 1',cash:5600,credit:0,note:'',noteType:'',livnevka:'debt',
+    payments:[
+      {date:'06.04.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:'Чл. взносы + комм. услуги + рез. фонд'},
+      {date:'14.06.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'20.04.2018',period:'Июль 2017 – Апрель 2018',amt:1900,isCredit:false,note:'Крупный платёж за период'},
+      {date:'07.11.2018',period:'Доп. взнос — дверь',amt:100,isCredit:false,note:'100 с за входную дверь'},
+      {date:'23.03.2020',period:'Апр 2019 – Апр 2020',amt:2400,isCredit:false,note:''}
+    ]},
+  2:{owner:'Алимжанова Расбу',addr:'Логвиненко 24/1, кв. 2',cash:17000,credit:0,note:'',noteType:'',livnevka:'paid',
+    payments:[
+      {date:'02.06.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:''},
+      {date:'02.06.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'01.12.2017',period:'Июль–Декабрь 2017',amt:1200,isCredit:false,note:'6 мес. по 200 с'},
+      {date:'02.12.2018',period:'Весь 2018 год',amt:2400,isCredit:false,note:'Оплачено полностью'},
+      {date:'20.03.2020',period:'Весь 2019 год',amt:2400,isCredit:false,note:'Оплачено полностью'},
+      {date:'20.03.2020',period:'Январь–Февраль 2021',amt:400,isCredit:false,note:''},
+      {date:'28.12.2020',period:'Март–Декабрь 2020',amt:2000,isCredit:false,note:'За 2020 г. полностью'},
+      {date:'Дек 2021',period:'Весь 2021 год',amt:2400,isCredit:false,note:'Оплачено полностью'},
+      {date:'24.04.2022',period:'Янв–Май 2022',amt:1000,isCredit:false,note:''},
+      {date:'30.11.2023',period:'Платёж 2023',amt:4000,isCredit:false,note:''}
+    ]},
+  3:{owner:'Кошелев Александр Сергеевич',addr:'Логвиненко 24/1, кв. 3',cash:18400,credit:0,note:'',noteType:'',livnevka:'debt',
+    payments:[
+      {date:'30.05.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:''},
+      {date:'20.07.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'XI.2019',period:'Апр–Дек 2019 + 2020',amt:3000,isCredit:false,note:'+ 1200 с за 2020 г.'},
+      {date:'—',period:'Июль–Декабрь 2020',amt:10200,isCredit:false,note:'Квитанции: 7200 + 3000 с'},
+      {date:'08.12.2023',period:'Июнь 2020 – 2023',amt:4000,isCredit:false,note:'Июнь 2020 — 1200 с; 2021–2023 — 7200 с; авг 2024 — 1600 с'}
+    ]},
+  4:{owner:'Ни Алла Николаевна',addr:'Логвиненко 24/1, кв. 4',cash:14400,credit:0,
+    note:'На обложке книжки: оплата за 3 года (2017–2019) — 7200 с; за 2020 г. — 8400 с',noteType:'info',livnevka:'paid',
+    payments:[
+      {date:'07.11.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:''},
+      {date:'29.10.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'29.10.2017',period:'Июль–Октябрь 2017',amt:800,isCredit:false,note:''},
+      {date:'08.08.2018',period:'Январь–Апрель 2018',amt:1200,isCredit:false,note:''},
+      {date:'08.08.2018',period:'Май–Декабрь 2018',amt:1600,isCredit:false,note:''},
+      {date:'29.12.2019',period:'Весь 2019 год',amt:2400,isCredit:false,note:'Оплачено полностью'},
+      {date:'15.11.2020',period:'Весь 2020 год',amt:2400,isCredit:false,note:''},
+      {date:'12.01.2022',period:'Весь 2021 год',amt:2400,isCredit:false,note:''},
+      {date:'15.01.2023',period:'Весь 2022 год',amt:2400,isCredit:false,note:''}
+    ]},
+  5:{owner:'Токалиева М. / Орозалиева К.',addr:'Логвиненко 24/1, кв. 5',cash:9600,credit:26000,
+    note:'Квартира выполнила замену кровли козырька подъезда за свой счёт на 26 000 с. Зачтена вместо денежных взносов с 2021 г. При взносе 2400 с/год квартира освобождена до 2031 г. Остаток зачёта на 2026 г.: ~14 800 с.',
+    noteType:'warn',livnevka:'paid',
+    payments:[
+      {date:'05.06.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:''},
+      {date:'05.06.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'—',period:'Июль–Декабрь 2017',amt:1200,isCredit:false,note:'6 мес. по 200 с'},
+      {date:'30.04.2018',period:'Январь–Май 2018',amt:1000,isCredit:false,note:''},
+      {date:'16.11.2018',period:'Июнь–Декабрь 2018',amt:1400,isCredit:false,note:''},
+      {date:'09.10.2019',period:'Январь–Июль 2019',amt:1400,isCredit:false,note:''},
+      {date:'24.03.2020',period:'Август–Декабрь 2019',amt:1000,isCredit:false,note:''},
+      {date:'21.03.2020',period:'Весь 2020 год',amt:2400,isCredit:false,note:''},
+      {date:'2021',period:'Зачёт: замена кровли козырька',amt:26000,isCredit:true,note:'Выполнена работа на 26 000 с — зачтена вместо денег'}
+    ]},
+  6:{owner:'Калмурзаев Замир',addr:'Логвиненко 24/1, кв. 6',cash:14400,credit:0,
+    note:'Долг 300 с за 2020 г. погашен 26.11.2022. Долг 1100 с за 2021 г. погашен 30.11.2022. Все долги закрыты.',
+    noteType:'ok',livnevka:'paid',
+    payments:[
+      {date:'06.04.2017',period:'Начальный взнос 2017',amt:500,isCredit:false,note:''},
+      {date:'—',period:'Январь–Июнь 2017',amt:1200,isCredit:false,note:'6 мес.'},
+      {date:'22.11.2018',period:'Июль–Декабрь 2018',amt:1200,isCredit:false,note:''},
+      {date:'22.11.2018',period:'Весь 2018 год',amt:2400,isCredit:false,note:'Оплачено полностью'},
+      {date:'23.11.2021',period:'Весь 2019 год',amt:2400,isCredit:false,note:''},
+      {date:'23.11.2021',period:'2020 год (неполная)',amt:2100,isCredit:false,note:'Долг 300 с'},
+      {date:'26.11.2022',period:'Погашение долга 2020',amt:300,isCredit:false,note:'Остаток 300 с закрыт'},
+      {date:'26.11.2022',period:'Январь–Июнь 2021',amt:1300,isCredit:false,note:''},
+      {date:'30.11.2022',period:'Долг за 2021 г. погашен',amt:1100,isCredit:false,note:''},
+      {date:'30.11.2022',period:'За 2022 год',amt:1900,isCredit:false,note:''}
+    ]},
+  7:{owner:'Делинда Л.В.',addr:'Логвиненко 24/1, кв. 7',cash:13200,credit:0,note:'',noteType:'',livnevka:'paid',
+    payments:[
+      {date:'12.06.2017',period:'Январь–Июнь 2017',amt:1200,isCredit:false,note:'6 мес. по 200 с'},
+      {date:'31.05.2018',period:'Июль–Август 2017',amt:400,isCredit:false,note:''},
+      {date:'22.01.2020',period:'Платёж',amt:200,isCredit:false,note:''},
+      {date:'23.03.2020',period:'Апр 2019 – итого 2019',amt:5100,isCredit:false,note:'Крупный платёж за несколько периодов'},
+      {date:'23.03.2020',period:'Январь–Февраль 2020',amt:400,isCredit:false,note:''},
+      {date:'21.05.2020',period:'Март–Май 2020',amt:600,isCredit:false,note:'По 200 с/мес'},
+      {date:'31.01.2024',period:'Платёж 2024',amt:800,isCredit:false,note:''},
+      {date:'20.03.2024',period:'Платёж 2024',amt:500,isCredit:false,note:''},
+      {date:'01.04.2024',period:'Платёж 2024',amt:500,isCredit:false,note:''},
+      {date:'19.04.2024',period:'Платёж 2024',amt:500,isCredit:false,note:''},
+      {date:'17.05.2024',period:'Платёж 2024',amt:500,isCredit:false,note:''},
+      {date:'11.09.2024',period:'Платёж 2024',amt:1500,isCredit:false,note:''},
+      {date:'02.12.2024',period:'Платёж 2024',amt:1000,isCredit:false,note:''}
+    ]},
+  8:{owner:'Калмурзаев Замир (Чынгыз)',addr:'Логвиненко 24/1, кв. 8',cash:5000,credit:0,
+    note:'Книжка ранее совмещалась с кв. 6. Платит крайне нерегулярно — за 2019–2023 гг. платежей нет.',
+    noteType:'bad',livnevka:'paid',
+    payments:[
+      {date:'22.11.2018',period:'2017 + 2018 годы',amt:4800,isCredit:false,note:'Янв–Дек 2017 (2400 с) + Янв–Дек 2018 (2400 с) — одним платежом'},
+      {date:'31.01.2024',period:'Взнос 2024',amt:200,isCredit:false,note:''}
+    ]},
+  9:{owner:'Старков Денис А.',addr:'Логвиненко 24/1, кв. 9',cash:4800,credit:34000,
+    note:'Квартира выполнила капитальный ремонт кровли подъезда за свой счёт на 34 000 с. Зачтено вместо денег со 2 кв. 2019 г. При взносе 2400 с/год квартира освобождена до 2033 г. Остаток зачёта на 2026 г.: ~16 600 с.',
+    noteType:'warn',livnevka:'paid',
+    payments:[
+      {date:'02.04.2017',period:'Январь–Март 2017',amt:600,isCredit:false,note:''},
+      {date:'15.06.2017',period:'Апрель–Июнь 2017',amt:600,isCredit:false,note:''},
+      {date:'—',period:'Июль–Сентябрь 2017',amt:600,isCredit:false,note:''},
+      {date:'—',period:'Октябрь–Декабрь 2017',amt:600,isCredit:false,note:''},
+      {date:'10.12.2018',period:'Январь–Июнь 2018',amt:1200,isCredit:false,note:''},
+      {date:'14.01.2019',period:'Июль–Декабрь 2018',amt:1200,isCredit:false,note:''},
+      {date:'2019',period:'Зачёт: капремонт кровли подъезда',amt:34000,isCredit:true,note:'Ремонт выполнен жильцом — зачтено вместо денег'}
+    ]},
+  10:{owner:'Ачекеев Нурлан',addr:'Логвиненко 24/1, кв. 10',cash:7300,credit:34000,
+    note:'Квартира выполнила капитальный ремонт кровли подъезда за свой счёт на 34 000 с. Зачтено вместо денег со 2 кв. 2019 г. При взносе 2400 с/год квартира освобождена до 2035 г. Остаток зачёта на 2026 г.: ~19 000 с.',
+    noteType:'warn',livnevka:'paid',
+    payments:[
+      {date:'06.04.2017',period:'Январь 2017',amt:200,isCredit:false,note:''},
+      {date:'18.06.2017',period:'Февраль–Июнь 2017',amt:1000,isCredit:false,note:''},
+      {date:'30.04.2018',period:'Июль–Август 2017',amt:400,isCredit:false,note:''},
+      {date:'07.11.2018',period:'Доп. взнос — дверь',amt:100,isCredit:false,note:'100 с за входную дверь'},
+      {date:'07.11.2018',period:'Сент 2017 – Дек 2018',amt:3200,isCredit:false,note:''},
+      {date:'19.03.2020',period:'Весь 2019 год',amt:2400,isCredit:false,note:''},
+      {date:'2019',period:'Зачёт: капремонт кровли подъезда',amt:34000,isCredit:true,note:'Ремонт выполнен жильцом — зачтено вместо денег'}
+    ]}
+};
+
+var BALANCES = {
+  1:{cash:5600,credit:0,balance:-13600},
+  2:{cash:17000,credit:0,balance:-2200},
+  3:{cash:18400,credit:0,balance:-800},
+  4:{cash:14400,credit:0,balance:-4800},
+  5:{cash:9600,credit:26000,balance:16400},
+  6:{cash:14400,credit:0,balance:-4800},
+  7:{cash:13200,credit:0,balance:-6000},
+  8:{cash:5000,credit:0,balance:-14200},
+  9:{cash:4800,credit:34000,balance:19600},
+  10:{cash:7300,credit:34000,balance:22100}
+};
+
+// Historical expenses (pre-loaded)
+var HIST_TXS = [
+  {id:'e00',description:'Расходы ТСЖ 2017–2018 (исторические)',type:'expense',amount:12202,date:'2018-12-31',cat:'Прочее',apt:null},
+  {id:'e01',description:'Дворник январь 2021',type:'expense',amount:1000,date:'2021-01-31',cat:'Дворник',apt:null},
+  {id:'e02',description:'Бытовая химия январь 2021',type:'expense',amount:500,date:'2021-01-31',cat:'Уборка',apt:null},
+  {id:'e03',description:'Дворник февраль 2021',type:'expense',amount:500,date:'2021-02-21',cat:'Дворник',apt:null},
+  {id:'e04',description:'Дворник июль 2021',type:'expense',amount:1000,date:'2021-07-31',cat:'Дворник',apt:null},
+  {id:'e05',description:'Дворник август 2021',type:'expense',amount:1000,date:'2021-08-31',cat:'Дворник',apt:null},
+  {id:'e06',description:'Дворник сентябрь 2021',type:'expense',amount:1000,date:'2021-10-06',cat:'Дворник',apt:null},
+  {id:'e07',description:'Дворник октябрь 2021',type:'expense',amount:1000,date:'2021-11-03',cat:'Дворник',apt:null},
+  {id:'e08',description:'Дворник ноябрь 2021',type:'expense',amount:1000,date:'2021-12-07',cat:'Дворник',apt:null},
+  {id:'e09',description:'Кассир Галина — расходы',type:'expense',amount:1000,date:'2021-12-31',cat:'Бухгалтер',apt:null},
+  {id:'e10',description:'Кассир Галина — бухгалтер',type:'expense',amount:1000,date:'2021-12-31',cat:'Бухгалтер',apt:null},
+  {id:'e11',description:'Дворник апрель 2022',type:'expense',amount:1050,date:'2022-04-30',cat:'Дворник',apt:null},
+  {id:'e12',description:'Дворник июль 2022',type:'expense',amount:1000,date:'2022-07-31',cat:'Дворник',apt:null},
+  {id:'e13',description:'Дворник сентябрь 2022',type:'expense',amount:1350,date:'2022-09-30',cat:'Дворник',apt:null},
+  {id:'e14',description:'Дворник октябрь 2022',type:'expense',amount:1000,date:'2022-10-31',cat:'Дворник',apt:null},
+  {id:'e15',description:'Дворник ноябрь 2022',type:'expense',amount:1000,date:'2022-11-30',cat:'Дворник',apt:null},
+  {id:'e16',description:'Спил сухих деревьев',type:'expense',amount:2500,date:'2023-06-25',cat:'Озеленение',apt:null},
+  {id:'e17',description:'Дворник август 2023',type:'expense',amount:1000,date:'2023-08-01',cat:'Дворник',apt:null},
+  {id:'e18',description:'Дворник сентябрь 2023',type:'expense',amount:1850,date:'2023-09-01',cat:'Дворник',apt:null},
+  {id:'e19',description:'Стрижка кустов (Галина Шираф)',type:'expense',amount:4700,date:'2023-09-15',cat:'Озеленение',apt:null},
+  {id:'e20',description:'Дворник октябрь 2023',type:'expense',amount:1400,date:'2023-10-30',cat:'Дворник',apt:null},
+  {id:'e21',description:'Дворник ноябрь 2023',type:'expense',amount:1300,date:'2023-12-03',cat:'Дворник',apt:null},
+  {id:'e22',description:'Дворник декабрь 2023',type:'expense',amount:500,date:'2023-12-17',cat:'Дворник',apt:null},
+  {id:'e23',description:'Замена оборудования входной двери',type:'expense',amount:1950,date:'2024-01-01',cat:'Ремонт',apt:null},
+  {id:'e24',description:'Дворник май 2024',type:'expense',amount:1334,date:'2024-05-19',cat:'Дворник',apt:null},
+  {id:'e25',description:'Подстрижка кустов май 2024',type:'expense',amount:200,date:'2024-05-19',cat:'Озеленение',apt:null},
+  {id:'e26',description:'Налог на землю май 2024',type:'expense',amount:795,date:'2024-05-19',cat:'Налоги',apt:null},
+  {id:'e27',description:'Замок в подвал',type:'expense',amount:100,date:'2024-06-01',cat:'Ремонт',apt:null},
+  {id:'e28',description:'Дворник июнь 2024',type:'expense',amount:1334,date:'2024-06-28',cat:'Дворник',apt:null},
+  {id:'e29',description:'Веник июнь 2024',type:'expense',amount:420,date:'2024-06-28',cat:'Уборка',apt:null},
+  {id:'e30',description:'Налог на землю 2025 (Косакова)',type:'expense',amount:1170,date:'2025-07-16',cat:'Налоги',apt:null},
+  {id:'e31',description:'Обрезка кустов ноябрь 2025',type:'expense',amount:250,date:'2025-11-16',cat:'Озеленение',apt:null},
+  {id:'e32',description:'Земельный налог 2026',type:'expense',amount:2467,date:'2026-01-01',cat:'Налоги',apt:null}
+];
+
+var APTS=[1,2,3,4,5,6,7,8,9,10];
+var MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+var MNAMES=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var CREDIT_FROM={5:2021,9:2021,10:2022};
+var CREDIT_TO={5:2031,9:2033,10:2035};
+
+function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function fmt(n){return Math.round(n).toLocaleString('ru-KG');}
+
+var aptPins=ld('lg5_pins',{1:'1111',2:'2222',3:'3333',4:'4444',5:'5555',6:'6666',7:'7777',8:'8888',9:'9999',10:'0000'});
+var adminPin=ld('lg5_apin','1234');
+var payments=ld('lg5_pay',{});
+var currentApt=null,pinBuf='',apinBuf='';
+var allTxs=[];
+
+function showToast(msg) {
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  setTimeout(function(){t.style.display='none';},2500);
+}
+
+// Load all transactions from Supabase + merge with historical
+function loadTxs() {
+  return sbGet('transactions').then(function(data) {
+    if(!Array.isArray(data)) data=[];
+    // Merge: historical first, then DB records
+    var dbIds=data.map(function(t){return t.id;});
+    var hist=HIST_TXS.filter(function(t){return dbIds.indexOf(t.id)<0;});
+    allTxs=hist.concat(data).sort(function(a,b){return a.date>b.date?1:-1;});
+    return allTxs;
+  }).catch(function(){
+    allTxs=HIST_TXS.slice();
+    return allTxs;
+  });
+}
+
+// Seed historical data to Supabase if empty
+function seedIfEmpty() {
+  return sbGet('transactions','&limit=1').then(function(data){
+    if(Array.isArray(data)&&data.length===0) {
+      return sbInsert('transactions', HIST_TXS);
+    }
+  }).catch(function(){});
+}
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  if(id==='s-home') renderHome();
+  if(id==='s-admin') { loadTxs().then(renderAdmin); }
+}
+
+function aTab(t) {
+  ['tx','pay','debt','pins','rep'].forEach(function(id){
+    document.getElementById('at-'+id).style.display=id===t?'block':'none';
+  });
+  document.querySelectorAll('.tabs .tab').forEach(function(el,i){
+    el.classList.toggle('active',['tx','pay','debt','pins','rep'][i]===t);
+  });
+  if(t==='debt') renderDebt();
+  if(t==='pins') renderPins();
+  if(t==='pay'){renderPayMonths();renderPayGrid();}
+  if(t==='rep') genRep();
+}
+
+function renderHome() {
+  loadTxs().then(function(txs){
+    var START_BALANCE = 28668; // передано Эржану 15.04.2026
+    var newExp=0, newInc=0;
+    txs.forEach(function(t){
+      // только новые операции (не исторические e00-e32)
+      if(!t.id.match(/^e\d+$/)) {
+        if(t.type==='expense') newExp+=t.amount;
+        else if(t.type==='income') newInc+=t.amount;
+      }
+    });
+    var currentBal = START_BALANCE - newExp + newInc;
+    var balEl = document.getElementById('h-bal');
+    balEl.textContent = fmt(currentBal) + ' с';
+    balEl.style.color = currentBal >= 0 ? '#2e7d32' : '#e53935';
+    document.getElementById('h-exp').textContent = fmt(newExp) + ' с';
+    document.getElementById('h-inc').textContent = fmt(newInc) + ' с';
+
+    var grid=document.getElementById('home-grid');
+    var html='';
+    APTS.forEach(function(n){
+      var a=APT[n]; var b=BALANCES[n];
+      var isCredit=b.credit>0;
+      var badgeCls=isCredit?'b-over':n===8?'b-no':'b-ok';
+      var badgeLabel=isCredit?'Зачтено работами<br>'+CREDIT_FROM[n]+'–'+CREDIT_TO[n]+' г.':n===8?'Задолженность':'В порядке';
+      var newPay=txs.filter(function(t){return t.apt===n&&t.type==='income'&&!t.id.match(/^e[0-9]+$/);}).reduce(function(s,t){return s+t.amount;},0);
+      var dynBal=b.balance+newPay;
+      var dynCash=a.cash+(a.credit||0)+newPay;
+      var balColor=dynBal>=0?'#2e7d32':'#c62828';
+      var balStr=(dynBal>=0?'+':'')+fmt(dynBal)+' с';
+      html+='<div class="apt-card" onclick="openApt('+n+')">'
+        +'<div><div class="apt-name">Квартира '+n+'</div>'
+        +'<div class="apt-owner">'+a.owner+'</div>'
+        +'<div class="apt-paid">Внесено: '+fmt(dynCash)+' с</div>'
+        +'<div class="apt-bal" style="color:'+balColor+'">'+balStr+'</div></div>'
+        +'<span class="badge '+badgeCls+'" style="text-align:center">'+badgeLabel+'</span>'
+        +'</div>';
+    });
+    grid.innerHTML=html;
+
+    var tl=document.getElementById('home-txlist');
+    var expenses=txs.filter(function(t){return t.type==='expense';}).reverse();
+    if(!expenses.length){tl.innerHTML='<div class="empty">Нет операций</div>';return;}
+    var rows='';
+    expenses.forEach(function(t){
+      rows+='<div class="tx-item">'
+        +'<div class="dot" style="background:#e53935"></div>'
+        +'<div class="tx-info"><div class="tx-desc">'+t.description+'</div><div class="tx-sub">'+t.cat+' · '+t.date+'</div></div>'
+        +'<div class="tx-amt" style="color:#e53935">−'+fmt(t.amount)+' с</div>'
+        +'</div>';
+    });
+    tl.innerHTML=rows;
+  });
+}
+
+function openApt(n){
+  currentApt=n; pinBuf=''; updatePD();
+  document.getElementById('pin-err').textContent='';
+  document.getElementById('pin-title').textContent='Квартира '+n+' — '+APT[n].owner;
+  go('s-apt-pin');
+}
+
+function updatePD(){[0,1,2,3].forEach(function(i){var d=document.getElementById('pd'+i);d.textContent=pinBuf.length>i?'●':'';d.classList.toggle('filled',pinBuf.length>i);});}
+
+function pk(k){
+  document.getElementById('pin-err').textContent='';
+  if(k==='c'){pinBuf='';updatePD();return;}
+  if(k==='d'){pinBuf=pinBuf.slice(0,-1);updatePD();return;}
+  if(pinBuf.length>=4) return;
+  pinBuf+=k; updatePD();
+  if(pinBuf.length===4){
+    if(pinBuf===aptPins[currentApt]) showAptView(currentApt);
+    else{document.getElementById('pin-err').textContent='Неверный пин-код. Попробуйте ещё раз.';pinBuf='';updatePD();}
+  }
+}
+
+function showAptView(n){
+  var a=APT[n]; var b=BALANCES[n];
+  var balColor=b.balance>=0?'#2e7d32':'#e53935';
+  var balLabel=b.balance>=0?'Переплата':'Долг';
+  var balStr=(b.balance>=0?'+':'')+fmt(b.balance)+' с';
+  document.getElementById('av-ini').textContent='К'+n;
+  document.getElementById('av-title').textContent='Квартира '+n;
+  document.getElementById('av-owner').textContent=a.owner;
+  document.getElementById('av-addr').textContent=a.addr;
+  document.getElementById('av-metrics').innerHTML=
+    '<div class="metric"><div class="metric-label">Внесено деньгами</div><div class="metric-value" style="color:#1565c0">'+fmt(b.cash)+' с</div></div>'
+    +'<div class="metric"><div class="metric-label">Зачёт работами</div><div class="metric-value" style="color:#e65100">'+(b.credit>0?fmt(b.credit)+' с':'—')+'</div></div>'
+    +'<div class="metric"><div class="metric-label">'+balLabel+'</div><div class="metric-value" style="color:'+balColor+'">'+balStr+'</div></div>';
+  var sb='';
+  if(a.note){var cls={ok:'s-ok',warn:'s-warn',bad:'s-bad',info:'s-info'}[a.noteType]||'s-info';sb+='<div class="sbox '+cls+'">'+a.note+'</div>';}
+  if(a.livnevka==='paid') sb+='<div class="sbox s-ok">✓ Ливнёвка оплачена — 350 с (собрано лично Эржаном)</div>';
+  if(a.livnevka==='debt') sb+='<div class="sbox s-bad">✗ Ливнёвка не оплачена — долг 350 с</div>';
+  document.getElementById('av-status-box').innerHTML=sb;
+  var userTxs=allTxs.filter(function(t){return t.apt===n&&t.type==='income';});
+  var allPay=a.payments.concat(userTxs.map(function(t){return{date:t.date,period:t.description,amt:t.amount,isCredit:false,note:''};}));
+  var plHtml='';
+  allPay.slice().reverse().forEach(function(p){
+    var c=p.isCredit?'#e65100':'#2e7d32';
+    plHtml+='<div class="pay-row"><div class="dot" style="background:'+c+';margin-top:5px;flex-shrink:0"></div>'
+      +'<div class="pay-info"><div style="font-size:13px;font-weight:600">'+p.period+'</div>'
+      +(p.note?'<div class="pay-note">'+p.note+'</div>':'')
+      +'<div style="font-size:11px;color:#bbb;margin-top:2px">'+p.date+'</div></div>'
+      +'<div style="font-weight:700;font-size:13px;color:'+c+';white-space:nowrap">'+(p.isCredit?'≈ ':' +')+fmt(p.amt)+' с</div></div>';
+  });
+  document.getElementById('av-paylist').innerHTML=plHtml||'<div class="empty">Нет данных</div>';
+  var expenses=allTxs.filter(function(t){return t.type==='expense';});
+  var totalExp=expenses.reduce(function(s,t){return s+t.amount;},0);
+  var elHtml='';
+  expenses.slice(-6).reverse().forEach(function(t){
+    elHtml+='<div class="pay-row"><div class="dot" style="background:#e53935;margin-top:5px;flex-shrink:0"></div>'
+      +'<div class="pay-info"><div style="font-size:13px">'+t.description+'</div><div style="font-size:11px;color:#bbb">'+t.cat+' · '+t.date+'</div></div>'
+      +'<div style="font-size:12px;color:#888;white-space:nowrap;font-weight:600">−'+fmt(Math.round(t.amount/10))+' с</div></div>';
+  });
+  elHtml+='<div style="padding-top:10px;font-size:13px;border-top:1px solid #f0f0ec;margin-top:4px">Ваша доля (1/10): <b style="color:#e53935">'+fmt(Math.round(totalExp/10))+' с</b></div>';
+  document.getElementById('av-explist').innerHTML=elHtml;
+  go('s-apt-view');
+}
+
+function updateAPD(){[0,1,2,3].forEach(function(i){var d=document.getElementById('apd'+i);d.textContent=apinBuf.length>i?'●':'';d.classList.toggle('filled',apinBuf.length>i);});}
+
+function apk(k){
+  document.getElementById('apin-err').textContent='';
+  if(k==='c'){apinBuf='';updateAPD();return;}
+  if(k==='d'){apinBuf=apinBuf.slice(0,-1);updateAPD();return;}
+  if(apinBuf.length>=4) return;
+  apinBuf+=k; updateAPD();
+  if(apinBuf.length===4){
+    if(apinBuf===adminPin) go('s-admin');
+    else{document.getElementById('apin-err').textContent='Неверный пин-код';apinBuf='';updateAPD();}
+  }
+}
+
+function renderAdmin(){
+  var sel=document.getElementById('tx-apt');
+  if(sel){var opts='<option value="">— общая операция —</option>';APTS.forEach(function(n){opts+='<option value="'+n+'">Кв. '+n+' — '+APT[n].owner+'</option>';});sel.innerHTML=opts;}
+  document.getElementById('tx-count').textContent=allTxs.length;
+  var tl=document.getElementById('admin-txlist');
+  var rows='';
+  allTxs.slice().reverse().forEach(function(t){
+    var c=t.type==='income'?'#2e7d32':'#e53935';
+    var sign=t.type==='income'?'+':'-';
+    var aptStr=t.apt?' <span style="color:#999;font-size:11px">(кв.'+t.apt+')</span>':'';
+    var delBtn=t.id.startsWith('e')?'':'<button class="tx-del" onclick="delTx(\''+t.id+'\')">×</button>';
+    rows+='<div class="tx-item"><div class="dot" style="background:'+c+'"></div>'
+      +'<div class="tx-info"><div class="tx-desc">'+t.description+aptStr+'</div><div class="tx-sub">'+(t.cat||'')+' · '+(t.date||'')+'</div></div>'
+      +'<div class="tx-amt" style="color:'+c+'">'+sign+fmt(t.amount)+' с</div>'+delBtn+'</div>';
+  });
+  tl.innerHTML=rows||'<div class="empty">Нет операций</div>';
+}
+
+function renderDebt(){
+  var rows=''; var totalDebt=0,totalCredit=0;
+  APTS.forEach(function(n){
+    var b=BALANCES[n]; var isPos=b.balance>=0;
+    var color=isPos?'#2e7d32':'#e53935'; var label=isPos?'переплата':'долг';
+    var creditStr=b.credit>0?' + зачёт '+fmt(b.credit)+' с':'';
+    var balStr=(isPos?'+':'')+fmt(b.balance)+' с';
+    if(isPos) totalCredit+=b.balance; else totalDebt+=Math.abs(b.balance);
+    rows+='<div class="debt-row"><div class="num-circle">'+n+'</div>'
+      +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+APT[n].owner+'</div>'
+      +'<div style="font-size:11px;color:#999">деньгами: '+fmt(b.cash)+' с'+creditStr+'</div></div>'
+      +'<div style="text-align:right"><div style="font-weight:700;color:'+color+'">'+balStr+'</div>'
+      +'<div style="font-size:11px;color:'+color+'">'+label+'</div></div></div>';
+  });
+  document.getElementById('debt-list').innerHTML=rows;
+  document.getElementById('debt-summary').innerHTML='Общий долг: <b style="color:#e53935">'+fmt(totalDebt)+' с</b> &nbsp;·&nbsp; Переплата работами: <b style="color:#2e7d32">'+fmt(totalCredit)+' с</b>';
+}
+
+function renderPayMonths(){
+  var monSel=document.getElementById('pay-mon-sel');
+  if(monSel&&!monSel.children.length){
+    var d=new Date();
+    for(var i=0;i<13;i++){
+      var dd=new Date(d.getFullYear(),d.getMonth()-i,1);
+      var k=dd.getFullYear()+'-'+String(dd.getMonth()+1).padStart(2,'0');
+      var o=document.createElement('option');
+      o.value=k; o.textContent=MONTHS[dd.getMonth()]+' '+dd.getFullYear();
+      if(i===0) o.selected=true;
+      monSel.appendChild(o);
+    }
+  }
+}
+
+function renderPayGrid(){
+  var monSel=document.getElementById('pay-mon-sel');
+  var d=new Date();
+  var mon=monSel?monSel.value:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var fee=parseInt(document.getElementById('fee-inp').value)||500;
+  var pg=document.getElementById('admin-pay-grid');
+  if(!pg) return;
+  var html='';
+  APTS.forEach(function(n){
+    var paid=payments[mon]&&payments[mon].indexOf(n)>=0;
+    html+='<div class="apt-card" onclick="togglePay('+n+',\''+mon+'\')">'
+      +'<div><div class="apt-name">Кв. '+n+'</div><div class="apt-owner">'+APT[n].owner.split(' ')[0]+'</div><div class="apt-paid">'+fmt(fee)+' с</div></div>'
+      +'<span class="badge '+(paid?'b-ok':'b-no')+'">'+(paid?'✓ Сдал':'Не сдал')+'</span></div>';
+  });
+  pg.innerHTML=html;
+  document.getElementById('paid-cnt').textContent=(payments[mon]||[]).length;
+}
+
+function renderPins(){
+  var html='';
+  APTS.forEach(function(n){html+='<div class="pin-row"><label>Кв. '+n+' — '+APT[n].owner.split(' ')[0]+'</label><input type="text" id="pn-'+n+'" maxlength="4" value="'+(aptPins[n]||'')+'"></div>';});
+  document.getElementById('pin-setup').innerHTML=html;
+}
+
+function togglePay(n,mon){
+  if(!payments[mon]) payments[mon]=[];
+  var idx=payments[mon].indexOf(n);
+  if(idx>=0) payments[mon].splice(idx,1); else payments[mon].push(n);
+  sv('lg5_pay',payments); renderPayGrid();
+}
+
+function addTx(){
+  var desc=document.getElementById('tx-desc').value.trim();
+  var amount=parseFloat(document.getElementById('tx-amt').value);
+  var type=document.getElementById('tx-type').value;
+  var date=document.getElementById('tx-date').value||new Date().toISOString().slice(0,10);
+  var cat=document.getElementById('tx-cat').value;
+  var aptV=document.getElementById('tx-apt').value;
+  if(!desc||!amount||amount<=0){alert('Заполните описание и сумму');return;}
+  var tx={id:'u'+Date.now(),description:desc,amount:amount,type:type,date:date,cat:cat,apt:aptV?parseInt(aptV):null};
+  sbInsert('transactions',tx).then(function(r){
+    if(r.ok){
+      showToast('Операция добавлена!');
+      document.getElementById('tx-desc').value='';
+      document.getElementById('tx-amt').value='';
+      loadTxs().then(function(){renderAdmin();renderHome();});
+    } else { alert('Ошибка при сохранении'); }
+  });
+}
+
+function delTx(id){
+  if(!confirm('Удалить эту запись?')) return;
+  sbDelete('transactions',id).then(function(){
+    showToast('Удалено');
+    loadTxs().then(function(){renderAdmin();renderHome();});
+  });
+}
+
+function savePins(){
+  APTS.forEach(function(n){var i=document.getElementById('pn-'+n);if(i&&i.value.length===4) aptPins[n]=i.value;});
+  sv('lg5_pins',aptPins); showToast('Пин-коды сохранены!');
+}
+
+function saveAPin(){
+  var v=document.getElementById('apin-new').value;
+  if(v.length!==4||!/^\d+$/.test(v)){alert('Пин должен быть 4 цифры');return;}
+  adminPin=v; sv('lg5_apin',adminPin); showToast('Пин администратора изменён!');
+}
+
+function genRep(){
+  var START_BALANCE = 28668;
+  var totalExp=0; var newExp=0; var newInc=0; var cats={};
+  allTxs.forEach(function(t){
+    if(t.type==='expense'){
+      totalExp+=t.amount;
+      cats[t.cat||'Прочее']=(cats[t.cat||'Прочее']||0)+t.amount;
+      if(!t.id.match(/^e\d+$/)) newExp+=t.amount;
+    } else if(!t.id.match(/^e\d+$/)) {
+      newInc+=t.amount;
+    }
+  });
+  var currentBal = START_BALANCE - newExp + newInc;
+  var d=new Date();
+  var mon=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  var paidNow=payments[mon]||[];
+  var unpaid=APTS.filter(function(n){return paidNow.indexOf(n)<0;});
+  var catLines=''; Object.keys(cats).forEach(function(k){catLines+='  • '+k+': '+fmt(cats[k])+' с\n';});
+  var debtLines=''; APTS.forEach(function(n){var b=BALANCES[n];if(b.balance<0) debtLines+='  Кв.'+n+' — '+APT[n].owner+': '+fmt(Math.abs(b.balance))+' с\n';});
+  var text='ОТЧЁТ КАССЫ ПОДЪЕЗДА №1\nЛогвиненко 24/1\n'+d.getDate()+' '+MNAMES[d.getMonth()]+' '+d.getFullYear()+'\n'
+    +'————————————————————\nБаланс в кассе: 28 668 с\nРасходов: '+fmt(totalExp)+' с\n\n'
+    +'Расходы по категориям:\n'+catLines
+    +'\nНедоплаты в ТСЖ (справочно):\n'+debtLines
+    +'\nЛивнёвка: долг кв.1 и кв.3 — по 350 с\n\n'
+    +'Сбор текущего периода:\n  Сдали: '+paidNow.length+'/10\n'
+    +(unpaid.length?'  Не сдали: кв. '+unpaid.join(', кв. '):'  Все сдали')+'\n'
+    +'————————————————————\nСтарший по подъезду — Эржан';
+  document.getElementById('rep-out').innerHTML='<div class="report-box">'+text+'</div>'
+    +'<button class="btn btn-primary btn-full" style="margin-top:10px" onclick="navigator.clipboard.writeText(document.querySelector(\'.report-box\').textContent).then(function(){alert(\'Скопировано!\');})">Скопировать текст</button>';
+}
+
+// Init
+document.getElementById('tx-date').value=new Date().toISOString().slice(0,10);
+seedIfEmpty().then(function(){renderHome();});
+</script>
+</body>
+</html>
