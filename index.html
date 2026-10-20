@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Касса подъезда №1 — Логвиненко 24/1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh}
+.app{max-width:680px;margin:0 auto;padding:16px}
+.screen{display:none}.screen.active{display:block}
+h1{font-size:20px;font-weight:700;margin-bottom:2px}
+.sub{font-size:12px;color:#888}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.metric{background:#fff;border-radius:12px;padding:12px;border:1px solid #e8e8e4;text-align:center}
+.metric-label{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.metric-value{font-size:15px;font-weight:700}
+.card{background:#fff;border-radius:14px;border:1px solid #e8e8e4;padding:16px;margin-bottom:12px}
+.sec{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tabs{display:flex;border-bottom:1px solid #e8e8e4;margin-bottom:18px;overflow-x:auto}
+.tab{padding:9px 12px;border:none;background:none;cursor:pointer;font-size:13px;color:#999;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-weight:500}
+.tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:700}
+.apt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.apt-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:6px}
+.apt-card:active{background:#f4f4f0}
+.apt-name{font-size:13px;font-weight:700}
+.apt-owner{font-size:10px;color:#999;margin-top:1px}
+.apt-paid{font-size:11px;color:#555;margin-top:2px}
+.apt-bal{font-size:11px;font-weight:700;margin-top:2px}
+.badge{font-size:10px;padding:3px 7px;border-radius:20px;font-weight:600;white-space:nowrap;text-align:center;line-height:1.4}
+.b-ok{background:#e8f5e9;color:#2e7d32}
+.b-no{background:#fde8e8;color:#c62828}
+.b-over{background:#fff3e0;color:#e65100}
+.tx-item{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid #f0f0ec}
+.tx-item:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tx-info{flex:1}
+.tx-desc{font-size:13px;line-height:1.3}
+.tx-sub{font-size:11px;color:#999;margin-top:2px}
+.tx-amt{font-weight:700;font-size:13px;white-space:nowrap}
+.tx-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;padding:0 4px}
+.tx-del:hover{color:#e53935}
+.fg{flex:1}.fg label{display:block;font-size:11px;color:#666;margin-bottom:3px;font-weight:600}
+.fg input,.fg select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;color:#1a1a1a}
+.form-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-end}
+.btn{padding:9px 16px;border:1px solid #ddd;border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:#1a1a1a}
+.btn:active{opacity:.8}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-danger{color:#c62828;border-color:#f5c6c6}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.pin-dot{width:48px;height:56px;border:1.5px solid #ddd;border-radius:12px;font-size:28px;font-weight:700;text-align:center;line-height:56px;background:#fff;color:#1a1a1a}
+.pin-dot.filled{border-color:#1a1a1a;background:#f0f0ec}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto}
+.nk{padding:16px;border:1px solid #e8e8e4;border-radius:12px;background:#fff;cursor:pointer;font-size:18px;font-weight:700;color:#1a1a1a;text-align:center;user-select:none}
+.nk:active{background:#f0f0ec}
+.back{background:none;border:none;cursor:pointer;font-size:13px;color:#888;padding:0}
+.back:hover{color:#1a1a1a}
+.avatar{width:48px;height:48px;border-radius:50%;background:#e3f2fd;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#1565c0;flex-shrink:0}
+.pay-row{display:flex;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0f0ec;gap:8px}
+.pay-row:last-child{border-bottom:none}
+.pay-info{flex:1}
+.pay-note{font-size:11px;color:#999;margin-top:2px;font-style:italic}
+.pin-err{font-size:13px;color:#c62828;text-align:center;min-height:20px;margin-bottom:10px}
+.report-box{background:#f4f4f0;border-radius:10px;padding:14px;font-size:12px;font-family:monospace;white-space:pre-wrap;line-height:1.8;color:#444;border:1px solid #e0e0dc;margin-top:10px}
+.pin-setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pin-row{display:flex;align-items:center;gap:8px;background:#f9f9f6;border-radius:8px;padding:8px 10px}
+.pin-row label{font-size:12px;color:#666;flex:1;font-weight:600}
+.pin-row input{width:72px;text-align:center;padding:5px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.empty{text-align:center;padding:20px;color:#bbb;font-size:13px}
+.sbox{border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:10px;line-height:1.7}
+.s-ok{background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9}
+.s-warn{background:#fff3e0;color:#e65100;border:1px solid #ffe0b2}
+.s-bad{background:#fde8e8;color:#c62828;border:1px solid #ffcdd2}
+.s-info{background:#e3f2fd;color:#1565c0;border:1px solid #bbdefb}
+.banner{background:#fff3e0;border:1px solid #ffe0b2;color:#e65100;border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:12px;line-height:1.6}
+.coll{background:#f3e5f5;border:1px solid #ce93d8;border-radius:12px;padding:14px;margin-bottom:12px}
+.coll-title{font-size:14px;font-weight:700;color:#4a148c}
+.coll-meta{font-size:11px;color:#6a1b9a;margin-top:2px;line-height:1.5}
+.bar{height:6px;background:#e1bee7;border-radius:3px;margin:8px 0;overflow:hidden}
+.bar>div{height:100%;background:#6a1b9a}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600}
+.chip.ok{background:#e8f5e9;color:#2e7d32}
+.chip.no{background:#fde8e8;color:#c62828}
+details summary{cursor:pointer;font-size:13px;font-weight:600;padding:6px 0}
+.debt-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0ec;gap:8px;font-size:13px}
+.debt-row:last-child{border-bottom:none}
+.num-circle{width:28px;height:28px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:999;display:none;max-width:90%;text-align:center}
+.coll-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.rcpt{background:#fff;border:1.5px solid #2b2b2b;border-radius:6px;padding:18px 16px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;max-width:460px;margin:0 auto}
+.rcpt-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #2b2b2b;padding-bottom:8px;margin-bottom:10px;gap:8px}
+.rcpt-no{font-size:20px;font-weight:700;letter-spacing:.02em}
+.rcpt-line{display:flex;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px dotted #aaa}
+.rcpt-line span:first-child{color:#666;min-width:96px}
+.rcpt-tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.rcpt-tbl th,.rcpt-tbl td{border:1px solid #2b2b2b;padding:6px;text-align:left;vertical-align:top}
+.rcpt-tbl th{font-weight:600;background:#f4f4f0}
+.rcpt-total{display:flex;justify-content:flex-end;gap:10px;font-size:16px;font-weight:700;margin-top:4px}
+.rcpt-sign{margin-top:16px;font-size:13px;color:#444;border-top:1px dotted #aaa;padding-top:8px}
+.mgrid{border-collapse:collapse;font-size:12px;min-width:100%}
+.mgrid th,.mgrid td{border:1px solid #e8e8e4;padding:5px 6px;text-align:center;white-space:nowrap}
+.mgrid th{background:#f4f4f0;font-weight:600}
+.m-ok{color:#2e7d32;font-weight:700}.m-no{color:#c62828;font-weight:700;background:#fdf1f1}.m-cr{color:#e65100;font-weight:700}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.rcpt-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f0f0ec;cursor:pointer;font-size:13px}
+.rcpt-item:last-child{border-bottom:none}
+.rcpt-item:hover{background:#fafaf7}
+@media(max-width:400px){.metrics{grid-template-columns:1fr 1fr}.apt-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="toast" id="toast"></div>
+
+<!-- ГЛАВНАЯ -->
+<div id="s-home" class="screen active">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+    <div><h1>Касса подъезда №1</h1><div class="sub">Логвиненко 24/1 · данные с 2017 года</div></div>
+    <button class="btn btn-sm" onclick="go('s-apin')">Старший →</button>
+  </div>
+  <div id="home-banner"></div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Баланс кассы</div><div class="metric-value" id="h-bal">...</div></div>
+    <div class="metric"><div class="metric-label">Новые расходы</div><div class="metric-value" style="color:#c62828" id="h-exp">...</div></div>
+    <div class="metric"><div class="metric-label">Новые доходы</div><div class="metric-value" style="color:#2e7d32" id="h-inc">...</div></div>
+  </div>
+  <div style="font-size:11px;color:#888;margin:-8px 0 16px">Баланс = 28 668 с (остаток, переданный старшему 15.04.2026) − новые расходы + новые доходы.</div>
+  <div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:12px;padding:14px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Справка — история ТСЖ</div>
+    <div style="font-size:13px;color:#1565c0;line-height:1.6">ТСЖ прекратило работу. Взносы с 2017 по 2024 год собирались по 2 400 с/год с квартиры (норма за 8 лет — 19 200 с). Некоторые квартиры недоплатили, некоторые выполнили ремонтные работы вместо денег — это видно в портфолио каждой квартиры. С апреля 2026 года действует ежемесячная плата 200 с с квартиры; на отдельные нужды подъезда проводятся сборы.</div>
+  </div>
+  <div id="home-debts"></div>
+  <div id="home-colls"></div>
+  <div class="sec">Портфолио квартир — нажмите для входа</div>
+  <div class="apt-grid" id="home-grid"><div class="empty">Загрузка...</div></div>
+  <div class="card">
+    <div class="sec">История расходов и поступлений</div>
+    <div id="home-txlist"><div class="empty">Загрузка...</div></div>
+  </div>
+  <div id="home-archive"></div>
+</div>
+
+<!-- ПИН КВАРТИРЫ -->
+<div id="s-apt-pin" class="screen">
+  <button class="back" style="margin-bottom:20px" onclick="go('s-home')">← Назад</button>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:17px;font-weight:700" id="pin-title">Квартира</div>
+    <div style="font-size:12px;color:#888;margin-top:4px">Введите пин-код</div>
+  </div>
+  <div class="pin-wrap">
+    <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+  <div class="numpad">
+    <button class="nk" onclick="pk('1')">1</button><button class="nk" onclick="pk('2')">2</button><button class="nk" onclick="pk('3')">3</button>
+    <button class="nk" onclick="pk('4')">4</button><button class="nk" onclick="pk('5')">5</button><button class="nk" onclick="pk('6')">6</button>
+    <button class="nk" onclick="pk('7')">7</button><button class="nk" onclick="pk('8')">8</button><button class="nk" onclick="pk('9')">9</button>
+    <button class="nk" onclick="pk('c')" style="font-size:12px;color:#888;font-weight:500">Очист.</button>
+    <button class="nk" onclick="pk('0')">0</button>
+    <button class="nk" onclick="pk('d')" style="font-size:20px">⌫</button>
+  </div>
+</div>
+
+<!-- ПОРТФОЛИО КВАРТИРЫ -->
+<div id="s-apt-view" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <button class="back" onclick="go('s-home')">← Назад</button>
+    <button class="btn btn-sm" onclick="refreshApt()">↻ Обновить</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <div class="avatar" id="av-ini">К1</div>
+    <div>
+      <div style="font-size:17px;font-weight:700" id="av-title">Квартира 1</div>
+      <div style="font-size:13px;color:#444;font-weight:600;margin-top:1px" id="av-owner"></div>
+      <div style="font-size:11px;color:#888" id="av-addr"></div>
+    </div>
+  </div>
+  <div id="av-metrics" class="metrics"></div>
+  <div id="av-status-box"></div>
+  <div class="card">
+    <div class="sec">Ежемесячная плата по месяцам</div>
+    <div id="av-months"></div>
+    <div class="sec" style="margin-top:6px">Квитанции</div>
+    <div id="av-rcpts"></div>
+  </div>
+  <div class="card">
+    <div class="sec">История платежей из книжки ТСЖ и новые взносы</div>
+    <div id="av-paylist"></div>
+  </div>
+  <div class="card">
+    <div class="sec">Расходы подъезда — ваша доля (1/10)</div>
+    <div id="av-explist"></div>
+  </div>
+</div>
+
+<!-- КВИТАНЦИЯ -->
+<div id="s-receipt" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px">
+    <button class="back" onclick="closeReceipt()">← Назад</button>
+    <button class="btn btn-sm btn-primary" onclick="copyReceipt()">Скопировать для WhatsApp</button>
+  </div>
+  <div id="rcpt-body"></div>
+</div>
+
+<!-- ПИН АДМИНА -->
+<div id="s-apin" class="screen">
+  <button class="back" style="margin-bottom:20px" onclick="go('s-home')">← Назад</button>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:17px;font-weight:700">Вход старшего по подъезду</div>
+    <div style="font-size:12px;color:#888;margin-top:4px">Введите пин-код администратора</div>
+  </div>
+  <div class="pin-wrap">
+    <div class="pin-dot" id="apd0"></div><div class="pin-dot" id="apd1"></div>
+    <div class="pin-dot" id="apd2"></div><div class="pin-dot" id="apd3"></div>
+  </div>
+  <div class="pin-err" id="apin-err"></div>
+  <div class="numpad">
+    <button class="nk" onclick="apk('1')">1</button><button class="nk" onclick="apk('2')">2</button><button class="nk" onclick="apk('3')">3</button>
+    <button class="nk" onclick="apk('4')">4</button><button class="nk" onclick="apk('5')">5</button><button class="nk" onclick="apk('6')">6</button>
+    <button class="nk" onclick="apk('7')">7</button><button class="nk" onclick="apk('8')">8</button><button class="nk" onclick="apk('9')">9</button>
+    <button class="nk" onclick="apk('c')" style="font-size:12px;color:#888;font-weight:500">Очист.</button>
+    <button class="nk" onclick="apk('0')">0</button>
+    <button class="nk" onclick="apk('d')" style="font-size:20px">⌫</button>
+  </div>
+</div>
+
+<!-- ПАНЕЛЬ СТАРШЕГО -->
+<div id="s-admin" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div><h1>Панель старшего</h1><div class="sub">Эржан · Логвиненко 24/1</div></div>
+    <button class="btn btn-sm" onclick="go('s-home')">Выйти</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="aTab('tx')">Операции</button>
+    <button class="tab" onclick="aTab('rcpt')">Квитанции</button>
+    <button class="tab" onclick="aTab('coll')">Сборы</button>
+    <button class="tab" onclick="aTab('debt')">Долги ТСЖ</button>
+    <button class="tab" onclick="aTab('pins')">Пин-коды</button>
+    <button class="tab" onclick="aTab('rep')">Отчёт</button>
+  </div>
+
+  <div id="at-tx">
+    <div class="card">
+      <div class="sec">Добавить операцию</div>
+      <div class="form-row">
+        <div class="fg" style="flex:2"><label>Описание</label><input type="text" id="tx-desc" placeholder="Оплата дворнику..."></div>
+        <div class="fg"><label>Тип</label><select id="tx-type" onchange="syncCat()"><option value="expense">Расход</option><option value="income">Взнос/Доход</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Сумма (сом)</label><input type="number" id="tx-amt" placeholder="1000" min="0"></div>
+        <div class="fg"><label>Дата</label><input type="date" id="tx-date"></div>
+        <div class="fg"><label>Категория</label>
+          <select id="tx-cat"><option>Ежемесячная плата</option><option>Погашение долга ТСЖ</option><option>Дворник</option><option>Уборка</option><option>Ремонт</option><option>Электрика</option><option>Озеленение</option><option>Налоги</option><option>Бухгалтер</option><option>Взносы жильцов</option><option>Прочее</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Квартира (если взнос от жильца — для ежемесячной платы обязательно)</label><select id="tx-apt" onchange="syncCat()"></select></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="addTx()">Добавить</button></div>
+      </div>
+    </div>
+    <div class="sec">Все операции (<span id="tx-count">0</span>)</div>
+    <div id="admin-txlist"></div>
+  </div>
+
+  <div id="at-rcpt" style="display:none">
+    <div class="card">
+      <div class="sec">Выписать квитанцию за ежемесячную плату</div>
+      <div class="form-row">
+        <div class="fg"><label>Квартира</label><select id="r-apt" onchange="renderRcptForm()"></select></div>
+        <div class="fg"><label>Дата оплаты</label><input type="date" id="r-date"></div>
+      </div>
+      <div id="r-owed" style="font-size:12px;color:#555;line-height:1.6;margin:4px 0 10px"></div>
+      <div class="form-row">
+        <div class="fg"><label>Сколько месяцев оплачено</label><select id="r-count" onchange="renderRcptSum()"></select></div>
+        <div class="fg"><label>Сумма, с</label><input type="text" id="r-sum" readonly></div>
+      </div>
+      <div id="r-period" style="font-size:13px;margin:4px 0 12px"></div>
+      <button class="btn btn-primary btn-full" id="r-issue" onclick="issueReceipt()">Выписать квитанцию</button>
+      <div style="font-size:11px;color:#888;margin-top:8px">Сумма поступит в кассу, долг квартиры уменьшится, квитанция появится в портфолио квартиры.</div>
+    </div>
+    <div class="sec">Оплата по месяцам</div>
+    <div class="card" style="overflow-x:auto;padding:10px"><div id="r-grid"></div></div>
+    <div style="font-size:11px;color:#888;margin:-4px 0 14px">✓ оплачено · ✗ не оплачено · З — покрыто зачётом за ремонт</div>
+    <div class="sec">Выписанные квитанции</div>
+    <div class="card"><div id="r-list"></div></div>
+  </div>
+
+  <div id="at-coll" style="display:none">
+    <div class="card">
+      <div class="sec">Новый сбор</div>
+      <div style="font-size:11px;color:#888;margin-bottom:10px">Отметка «Сдал» сама по себе в кассу деньги не добавляет. Если деньги сбора пошли в кассу, внесите их ещё и как поступление во вкладке «Операции».</div>
+      <div class="form-row">
+        <div class="fg" style="flex:2"><label>Название</label><input type="text" id="c-title" placeholder="Например: замена лампочек"></div>
+        <div class="fg"><label>Сумма с квартиры</label><input type="number" id="c-amt" placeholder="350" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Дата</label><input type="date" id="c-date"></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="createColl()">Создать сбор</button></div>
+      </div>
+    </div>
+    <div class="sec">Активные сборы</div>
+    <div id="coll-active"></div>
+    <div class="sec" style="margin-top:16px">Архив</div>
+    <div id="coll-archive"></div>
+  </div>
+
+  <div id="at-debt" style="display:none">
+    <div class="card">
+      <div class="sec" style="margin-bottom:4px">История недоплат в ТСЖ (2017–2024)</div>
+      <div style="font-size:11px;color:#888;margin-bottom:12px">ТСЖ прекратило работу. Данные для справки — кто сколько недоплатил за 8 лет. Норма: 19 200 с/квартира. Считается по сводной таблице из тетради.</div>
+      <div id="debt-list"></div>
+      <div id="debt-summary" style="margin-top:10px;padding-top:10px;border-top:1px solid #e8e8e4;font-size:12px;color:#888"></div>
+    </div>
+  </div>
+
+  <div id="at-pins" style="display:none">
+    <div class="card">
+      <div class="sec">Пин-коды квартир (4 цифры)</div>
+      <div class="pin-setup-grid" id="pin-setup"></div>
+      <button class="btn btn-primary btn-full" onclick="savePins()">Сохранить пин-коды</button>
+    </div>
+    <div class="card">
+      <div class="sec">Пин-код администратора</div>
+      <div class="form-row" style="align-items:flex-end">
+        <div class="fg" style="max-width:150px"><label>Новый пин (4 цифры)</label><input type="text" id="apin-new" maxlength="4" placeholder="****"></div>
+        <button class="btn" onclick="saveAPin()">Изменить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="at-rep" style="display:none">
+    <div class="card">
+      <div class="sec">Отчёт для WhatsApp</div>
+      <button class="btn btn-primary btn-full" onclick="genRep()">Сгенерировать отчёт</button>
+      <div id="rep-out"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+// ====================================================================
+// ПОДКЛЮЧЕНИЕ К SUPABASE
+// ====================================================================
+var SB_URL = 'https://vwayotpdslglhanbkczz.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3YXlvdHBkc2xnbGhhbmJrY3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjM5NTMsImV4cCI6MjA5MjQzOTk1M30.bbmdyfEu5YG1_wj0ijL9yTcJ0B_GNscuuVmhUMfabDk';
+
+function sb(method, path, body, prefer) {
+  var h = {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY};
+  if (body !== undefined) h['Content-Type'] = 'application/json';
+  if (prefer) h['Prefer'] = prefer;
+  return fetch(SB_URL + '/rest/v1/' + path, {method: method, headers: h, body: body !== undefined ? JSON.stringify(body) : undefined});
+}
+function sbJson(path) {
+  return sb('GET', path).then(function(r) {
+    if (!r.ok) throw new Error('http ' + r.status);
+    return r.json();
+  });
+}
+function sbOk(r) { if (!r.ok) throw new Error('http ' + r.status); return r; }
+
+// ====================================================================
+// ДАННЫЕ КВАРТИР (из книжек ТСЖ; итоги сверены со сводной таблицей)
+// cash = внесено деньгами, credit = зачтено работами
+// ====================================================================
+var APT = {
+  1: {owner: 'Ураимов М.', addr: 'Логвиненко 24/1, кв. 1', cash: 5600, credit: 0, note: '', noteType: '',
+    payments: [
+      {date: '06.04.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: 'Чл. взносы + комм. услуги + рез. фонд'},
+      {date: '14.06.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '20.04.2018', period: 'Июль 2017 – Апрель 2018', amt: 1900, isCredit: false, note: 'Крупный платёж за период'},
+      {date: '07.11.2018', period: 'Доп. взнос — дверь', amt: 100, isCredit: false, note: '100 с за входную дверь'},
+      {date: '23.03.2020', period: 'Апр 2019 – Апр 2020', amt: 2400, isCredit: false, note: ''}
+    ]},
+  2: {owner: 'Алимжанова Расбу', addr: 'Логвиненко 24/1, кв. 2', cash: 17000, credit: 0, note: '', noteType: '',
+    payments: [
+      {date: '02.06.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: ''},
+      {date: '02.06.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '01.12.2017', period: 'Июль–Декабрь 2017', amt: 1200, isCredit: false, note: '6 мес. по 200 с'},
+      {date: '02.12.2018', period: 'Весь 2018 год', amt: 2400, isCredit: false, note: 'Оплачено полностью'},
+      {date: '20.03.2020', period: 'Весь 2019 год', amt: 2400, isCredit: false, note: 'Оплачено полностью'},
+      {date: '20.03.2020', period: 'Январь–Февраль 2021', amt: 400, isCredit: false, note: ''},
+      {date: '28.12.2020', period: 'Март–Декабрь 2020', amt: 2000, isCredit: false, note: 'За 2020 г. полностью'},
+      {date: 'Дек 2021', period: 'Весь 2021 год', amt: 2400, isCredit: false, note: 'Оплачено полностью'},
+      {date: '24.04.2022', period: 'Янв–Май 2022', amt: 1000, isCredit: false, note: ''},
+      {date: '30.11.2023', period: 'Платёж 2023', amt: 4000, isCredit: false, note: ''}
+    ]},
+  3: {owner: 'Кошелев Александр Сергеевич', addr: 'Логвиненко 24/1, кв. 3', cash: 18400, credit: 0, note: '', noteType: '',
+    payments: [
+      {date: '30.05.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: ''},
+      {date: '20.07.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: 'XI.2019', period: 'Апр–Дек 2019 + 2020', amt: 3000, isCredit: false, note: '+ 1200 с за 2020 г.'},
+      {date: '—', period: 'Июль–Декабрь 2020', amt: 10200, isCredit: false, note: 'Квитанции: 7200 + 3000 с'},
+      {date: '08.12.2023', period: 'Июнь 2020 – 2023', amt: 4000, isCredit: false, note: 'Июнь 2020 — 1200 с; 2021–2023 — 7200 с; авг 2024 — 1600 с'}
+    ]},
+  4: {owner: 'Ни Алла Николаевна', addr: 'Логвиненко 24/1, кв. 4', cash: 14400, credit: 0,
+    note: 'На обложке книжки: оплата за 3 года (2017–2019) — 7200 с; за 2020 г. — 8400 с', noteType: 'info',
+    payments: [
+      {date: '07.11.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: ''},
+      {date: '29.10.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '29.10.2017', period: 'Июль–Октябрь 2017', amt: 800, isCredit: false, note: ''},
+      {date: '08.08.2018', period: 'Январь–Апрель 2018', amt: 1200, isCredit: false, note: ''},
+      {date: '08.08.2018', period: 'Май–Декабрь 2018', amt: 1600, isCredit: false, note: ''},
+      {date: '29.12.2019', period: 'Весь 2019 год', amt: 2400, isCredit: false, note: 'Оплачено полностью'},
+      {date: '15.11.2020', period: 'Весь 2020 год', amt: 2400, isCredit: false, note: ''},
+      {date: '12.01.2022', period: 'Весь 2021 год', amt: 2400, isCredit: false, note: ''},
+      {date: '15.01.2023', period: 'Весь 2022 год', amt: 2400, isCredit: false, note: ''}
+    ]},
+  5: {owner: 'Токалиева М. / Орозалиева К.', addr: 'Логвиненко 24/1, кв. 5', cash: 9600, credit: 26000,
+    note: 'Зачёт за ремонт: квартира за свой счёт сделала крышу козырька и навес подъезда на 26 000 с. Эта сумма зачтена вместо денежных взносов. С апреля 2026 из остатка зачёта списывается ежемесячная плата.',
+    noteType: 'warn',
+    payments: [
+      {date: '05.06.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: ''},
+      {date: '05.06.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '—', period: 'Июль–Декабрь 2017', amt: 1200, isCredit: false, note: '6 мес. по 200 с'},
+      {date: '30.04.2018', period: 'Январь–Май 2018', amt: 1000, isCredit: false, note: ''},
+      {date: '16.11.2018', period: 'Июнь–Декабрь 2018', amt: 1400, isCredit: false, note: ''},
+      {date: '09.10.2019', period: 'Январь–Июль 2019', amt: 1400, isCredit: false, note: ''},
+      {date: '24.03.2020', period: 'Август–Декабрь 2019', amt: 1000, isCredit: false, note: ''},
+      {date: '21.03.2020', period: 'Весь 2020 год', amt: 2400, isCredit: false, note: ''},
+      {date: '2021', period: 'Зачёт: крыша козырька и навес', amt: 26000, isCredit: true, note: 'Работа сделана за свой счёт на 26 000 с — зачтена вместо денег'}
+    ]},
+  6: {owner: 'Калмурзаев Замир', addr: 'Логвиненко 24/1, кв. 6', cash: 14400, credit: 0,
+    note: 'Долг 300 с за 2020 г. погашен 26.11.2022. Долг 1100 с за 2021 г. погашен 30.11.2022. Все долги закрыты.', noteType: 'ok',
+    payments: [
+      {date: '06.04.2017', period: 'Начальный взнос 2017', amt: 500, isCredit: false, note: ''},
+      {date: '—', period: 'Январь–Июнь 2017', amt: 1200, isCredit: false, note: '6 мес.'},
+      {date: '22.11.2018', period: 'Июль–Декабрь 2018', amt: 1200, isCredit: false, note: ''},
+      {date: '22.11.2018', period: 'Весь 2018 год', amt: 2400, isCredit: false, note: 'Оплачено полностью'},
+      {date: '23.11.2021', period: 'Весь 2019 год', amt: 2400, isCredit: false, note: ''},
+      {date: '23.11.2021', period: '2020 год (неполная)', amt: 2100, isCredit: false, note: 'Долг 300 с'},
+      {date: '26.11.2022', period: 'Погашение долга 2020', amt: 300, isCredit: false, note: 'Остаток 300 с закрыт'},
+      {date: '26.11.2022', period: 'Январь–Июнь 2021', amt: 1300, isCredit: false, note: ''},
+      {date: '30.11.2022', period: 'Долг за 2021 г. погашен', amt: 1100, isCredit: false, note: ''},
+      {date: '30.11.2022', period: 'За 2022 год', amt: 1900, isCredit: false, note: ''}
+    ]},
+  7: {owner: 'Делинда Л.В.', addr: 'Логвиненко 24/1, кв. 7', cash: 13200, credit: 0, note: '', noteType: '',
+    payments: [
+      {date: '12.06.2017', period: 'Январь–Июнь 2017', amt: 1200, isCredit: false, note: '6 мес. по 200 с'},
+      {date: '31.05.2018', period: 'Июль–Август 2017', amt: 400, isCredit: false, note: ''},
+      {date: '22.01.2020', period: 'Платёж', amt: 200, isCredit: false, note: ''},
+      {date: '23.03.2020', period: 'Апр 2019 – итого 2019', amt: 5100, isCredit: false, note: 'Крупный платёж за несколько периодов'},
+      {date: '23.03.2020', period: 'Январь–Февраль 2020', amt: 400, isCredit: false, note: ''},
+      {date: '21.05.2020', period: 'Март–Май 2020', amt: 600, isCredit: false, note: 'По 200 с/мес'},
+      {date: '31.01.2024', period: 'Платёж 2024', amt: 800, isCredit: false, note: ''},
+      {date: '20.03.2024', period: 'Платёж 2024', amt: 500, isCredit: false, note: ''},
+      {date: '01.04.2024', period: 'Платёж 2024', amt: 500, isCredit: false, note: ''},
+      {date: '19.04.2024', period: 'Платёж 2024', amt: 500, isCredit: false, note: ''},
+      {date: '17.05.2024', period: 'Платёж 2024', amt: 500, isCredit: false, note: ''},
+      {date: '11.09.2024', period: 'Платёж 2024', amt: 1500, isCredit: false, note: ''},
+      {date: '02.12.2024', period: 'Платёж 2024', amt: 1000, isCredit: false, note: ''}
+    ]},
+  8: {owner: 'Калмурзаев Замир (Чынгыз)', addr: 'Логвиненко 24/1, кв. 8', cash: 5000, credit: 0,
+    note: 'Книжка ранее совмещалась с кв. 6. Платит крайне нерегулярно — за 2019–2023 гг. платежей нет.', noteType: 'bad',
+    payments: [
+      {date: '22.11.2018', period: '2017 + 2018 годы', amt: 4800, isCredit: false, note: 'Янв–Дек 2017 (2400 с) + Янв–Дек 2018 (2400 с) — одним платежом'},
+      {date: '31.01.2024', period: 'Взнос 2024', amt: 200, isCredit: false, note: ''}
+    ]},
+  9: {owner: 'Старков Денис А.', addr: 'Логвиненко 24/1, кв. 9', cash: 4800, credit: 34000,
+    note: 'Зачёт за ремонт: квартира за свой счёт сделала ремонт крыши дома на 34 000 с (со 2 кв. 2019 г.). Эта сумма зачтена вместо денежных взносов. С апреля 2026 из остатка зачёта списывается ежемесячная плата.',
+    noteType: 'warn',
+    payments: [
+      {date: '02.04.2017', period: 'Январь–Март 2017', amt: 600, isCredit: false, note: ''},
+      {date: '15.06.2017', period: 'Апрель–Июнь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '—', period: 'Июль–Сентябрь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '—', period: 'Октябрь–Декабрь 2017', amt: 600, isCredit: false, note: ''},
+      {date: '10.12.2018', period: 'Январь–Июнь 2018', amt: 1200, isCredit: false, note: ''},
+      {date: '14.01.2019', period: 'Июль–Декабрь 2018', amt: 1200, isCredit: false, note: ''},
+      {date: '2019', period: 'Зачёт: ремонт крыши дома', amt: 34000, isCredit: true, note: 'Ремонт сделан за свой счёт на 34 000 с — зачтено вместо денег'}
+    ]},
+  10: {owner: 'Ачекеев Нурлан', addr: 'Логвиненко 24/1, кв. 10', cash: 7300, credit: 34000,
+    note: 'Зачёт за ремонт: квартира за свой счёт сделала ремонт крыши дома на 34 000 с (со 2 кв. 2019 г.). Эта сумма зачтена вместо денежных взносов. С апреля 2026 из остатка зачёта списывается ежемесячная плата.',
+    noteType: 'warn',
+    payments: [
+      {date: '06.04.2017', period: 'Январь 2017', amt: 200, isCredit: false, note: ''},
+      {date: '18.06.2017', period: 'Февраль–Июнь 2017', amt: 1000, isCredit: false, note: ''},
+      {date: '30.04.2018', period: 'Июль–Август 2017', amt: 400, isCredit: false, note: ''},
+      {date: '07.11.2018', period: 'Доп. взнос — дверь', amt: 100, isCredit: false, note: '100 с за входную дверь'},
+      {date: '07.11.2018', period: 'Сент 2017 – Дек 2018', amt: 3200, isCredit: false, note: ''},
+      {date: '19.03.2020', period: 'Весь 2019 год', amt: 2400, isCredit: false, note: ''},
+      {date: '2019', period: 'Зачёт: ремонт крыши дома', amt: 34000, isCredit: true, note: 'Ремонт сделан за свой счёт на 34 000 с — зачтено вместо денег'}
+    ]}
+};
+
+var NORM = 19200;           // норма за 8 лет (2017–2024): 8 × 2400
+var START_BALANCE = 28668;  // остаток, переданный старшему 15.04.2026
+// Ежемесячная плата — с момента вступления нового старшего (апрель 2026)
+var FEE = 200;                      // сом в месяц с квартиры
+var FEE_START = {y: 2026, m: 4};    // первый начисляемый месяц: апрель 2026
+var DUE_DAY = 10;                   // срок оплаты — до 10 числа каждого месяца
+var CAT_FEE = 'Ежемесячная плата';
+// квартиры, у которых старый долг ТСЖ закрыт полностью (по решению старшего)
+var TSZH_CLOSED = {7: 'Старый долг ТСЖ закрыт полностью платежом 5 000 с (05.05.2026).'};
+var CAT_TSZH = 'Погашение долга ТСЖ';
+
+// ====================================================================
+// ИСТОРИЧЕСКИЕ РАСХОДЫ (всегда берутся из файла; на баланс не влияют)
+// ====================================================================
+var HIST_TXS = [
+  {id: 'e00', description: 'Расходы ТСЖ 2017–2018 (исторические)', type: 'expense', amount: 12202, date: '2018-12-31', cat: 'Прочее'},
+  {id: 'e01', description: 'Дворник январь 2021', type: 'expense', amount: 1000, date: '2021-01-31', cat: 'Дворник'},
+  {id: 'e02', description: 'Бытовая химия январь 2021', type: 'expense', amount: 500, date: '2021-01-31', cat: 'Уборка'},
+  {id: 'e03', description: 'Дворник февраль 2021', type: 'expense', amount: 500, date: '2021-02-21', cat: 'Дворник'},
+  {id: 'e04', description: 'Дворник июль 2021', type: 'expense', amount: 1000, date: '2021-07-31', cat: 'Дворник'},
+  {id: 'e05', description: 'Дворник август 2021', type: 'expense', amount: 1000, date: '2021-08-31', cat: 'Дворник'},
+  {id: 'e06', description: 'Дворник сентябрь 2021', type: 'expense', amount: 1000, date: '2021-10-06', cat: 'Дворник'},
+  {id: 'e07', description: 'Дворник октябрь 2021', type: 'expense', amount: 1000, date: '2021-11-03', cat: 'Дворник'},
+  {id: 'e08', description: 'Дворник ноябрь 2021', type: 'expense', amount: 1000, date: '2021-12-07', cat: 'Дворник'},
+  {id: 'e09', description: 'Кассир Галина — расходы', type: 'expense', amount: 1000, date: '2021-12-31', cat: 'Бухгалтер'},
+  {id: 'e10', description: 'Кассир Галина — бухгалтер', type: 'expense', amount: 1000, date: '2021-12-31', cat: 'Бухгалтер'},
+  {id: 'e11', description: 'Дворник апрель 2022', type: 'expense', amount: 1050, date: '2022-04-30', cat: 'Дворник'},
+  {id: 'e12', description: 'Дворник июль 2022', type: 'expense', amount: 1000, date: '2022-07-31', cat: 'Дворник'},
+  {id: 'e13', description: 'Дворник сентябрь 2022', type: 'expense', amount: 1350, date: '2022-09-30', cat: 'Дворник'},
+  {id: 'e14', description: 'Дворник октябрь 2022', type: 'expense', amount: 1000, date: '2022-10-31', cat: 'Дворник'},
+  {id: 'e15', description: 'Дворник ноябрь 2022', type: 'expense', amount: 1000, date: '2022-11-30', cat: 'Дворник'},
+  {id: 'e16', description: 'Спил сухих деревьев', type: 'expense', amount: 2500, date: '2023-06-25', cat: 'Озеленение'},
+  {id: 'e17', description: 'Дворник август 2023', type: 'expense', amount: 1000, date: '2023-08-01', cat: 'Дворник'},
+  {id: 'e18', description: 'Дворник сентябрь 2023', type: 'expense', amount: 1850, date: '2023-09-01', cat: 'Дворник'},
+  {id: 'e19', description: 'Стрижка кустов (Галина Шираф)', type: 'expense', amount: 4700, date: '2023-09-15', cat: 'Озеленение'},
+  {id: 'e20', description: 'Дворник октябрь 2023', type: 'expense', amount: 1400, date: '2023-10-30', cat: 'Дворник'},
+  {id: 'e21', description: 'Дворник ноябрь 2023', type: 'expense', amount: 1300, date: '2023-12-03', cat: 'Дворник'},
+  {id: 'e22', description: 'Дворник декабрь 2023', type: 'expense', amount: 500, date: '2023-12-17', cat: 'Дворник'},
+  {id: 'e23', description: 'Замена оборудования входной двери', type: 'expense', amount: 1950, date: '2024-01-01', cat: 'Ремонт'},
+  {id: 'e24', description: 'Дворник май 2024', type: 'expense', amount: 1334, date: '2024-05-19', cat: 'Дворник'},
+  {id: 'e25', description: 'Подстрижка кустов май 2024', type: 'expense', amount: 200, date: '2024-05-19', cat: 'Озеленение'},
+  {id: 'e26', description: 'Налог на землю май 2024', type: 'expense', amount: 795, date: '2024-05-19', cat: 'Налоги'},
+  {id: 'e27', description: 'Замок в подвал', type: 'expense', amount: 100, date: '2024-06-01', cat: 'Ремонт'},
+  {id: 'e28', description: 'Дворник июнь 2024', type: 'expense', amount: 1334, date: '2024-06-28', cat: 'Дворник'},
+  {id: 'e29', description: 'Веник июнь 2024', type: 'expense', amount: 42, date: '2024-06-28', cat: 'Уборка'},
+  {id: 'e30', description: 'Налог на землю 2025 (Косакова)', type: 'expense', amount: 1170, date: '2025-07-16', cat: 'Налоги'},
+  {id: 'e31', description: 'Обрезка кустов ноябрь 2025', type: 'expense', amount: 250, date: '2025-11-16', cat: 'Озеленение'},
+  {id: 'e32', description: 'Земельный налог 2026', type: 'expense', amount: 2467, date: '2026-01-01', cat: 'Налоги'}
+];
+
+// ====================================================================
+// СОСТОЯНИЕ
+// ====================================================================
+var APTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+var MNAMES = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var allTxs = HIST_TXS.slice();
+var collections = [];
+var collPay = {};
+var dataOk = true;
+var collOk = true;
+var seeded = false;
+var aptPins = {1: '1111', 2: '2222', 3: '3333', 4: '4444', 5: '5555', 6: '6666', 7: '7777', 8: '8888', 9: '9999', 10: '0000'};
+var adminPin = '1234';
+var currentApt = null, pinBuf = '', apinBuf = '';
+
+// ====================================================================
+// УТИЛИТЫ
+// ====================================================================
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
+function fd(s) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+  return m ? m[3] + '.' + m[2] + '.' + m[1] : (s || '');
+}
+function today() { return new Date().toISOString().slice(0, 10); }
+function isHist(id) { return /^e\d+$/.test(String(id)); }
+function el(id) { return document.getElementById(id); }
+function toast(msg) {
+  var t = el('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 2500);
+}
+
+// ====================================================================
+// ЗАГРУЗКА ДАННЫХ
+// ====================================================================
+function applySettings(rows) {
+  rows.forEach(function(r) {
+    if (r.key === 'apt_pins') {
+      try { var p = JSON.parse(r.value); Object.keys(p).forEach(function(k) { aptPins[k] = String(p[k]); }); } catch (e) {}
+    }
+    if (r.key === 'admin_pin' && r.value) adminPin = String(r.value);
+    if (r.key === 'collections_seeded') seeded = true;
+  });
+}
+
+function loadSettings() {
+  return sbJson('settings?select=*').then(applySettings).catch(function() {});
+}
+
+function loadTxs() {
+  return sbJson('transactions?select=*&order=date.asc').then(function(rows) {
+    var user = rows.filter(function(t) { return !isHist(t.id); }).map(function(t) {
+      return {id: t.id, description: t.description, type: t.type, amount: Number(t.amount) || 0, date: t.date, cat: t.cat, apt: t.apt};
+    });
+    allTxs = HIST_TXS.concat(user).sort(function(a, b) { return a.date > b.date ? 1 : (a.date < b.date ? -1 : 0); });
+    dataOk = true;
+  }).catch(function() {
+    allTxs = HIST_TXS.slice();
+    dataOk = false;
+  });
+}
+
+function loadColls() {
+  return Promise.all([
+    sbJson('collections?select=*&order=date_created.asc'),
+    sbJson('collection_payments?select=*')
+  ]).then(function(r) {
+    collections = r[0];
+    collPay = {};
+    r[1].forEach(function(p) {
+      if (!collPay[p.collection_id]) collPay[p.collection_id] = {};
+      collPay[p.collection_id][p.apt] = !!p.paid;
+    });
+    collOk = true;
+  }).catch(function() {
+    collections = []; collPay = {}; collOk = false;
+  });
+}
+
+// Один раз переносит сбор на ливнёвку (8 из 10 сдали) в новую систему сборов
+function seedCollsIfNeeded() {
+  if (!collOk || seeded || collections.length > 0) return Promise.resolve();
+  var paid = {2: 1, 4: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1};
+  var rows = APTS.map(function(n) { return {collection_id: 'c_livnevka', apt: n, paid: !!paid[n]}; });
+  return sb('POST', 'collections?on_conflict=id', {id: 'c_livnevka', title: 'Прочистка трубы ливнёвки', amount_per_apt: 350, date_created: '', status: 'active'}, 'resolution=merge-duplicates,return=minimal')
+    .then(sbOk)
+    .then(function() { return sb('POST', 'collection_payments?on_conflict=collection_id,apt', rows, 'resolution=merge-duplicates,return=minimal'); })
+    .then(sbOk)
+    .then(function() { return sb('POST', 'settings?on_conflict=key', {key: 'collections_seeded', value: '1'}, 'resolution=merge-duplicates,return=minimal'); })
+    .then(function() { seeded = true; return loadColls(); })
+    .catch(function() {});
+}
+
+function loadAll() {
+  return Promise.all([loadSettings(), loadTxs(), loadColls()]).then(seedCollsIfNeeded);
+}
+
+// ====================================================================
+// РАСЧЁТЫ
+// ====================================================================
+function cashBalance() {
+  var e = 0, i = 0;
+  allTxs.forEach(function(t) {
+    if (!isHist(t.id)) { if (t.type === 'expense') e += t.amount; else i += t.amount; }
+  });
+  return {bal: START_BALANCE - e + i, exp: e, inc: i};
+}
+
+function baseBalance(n) { return APT[n].cash + APT[n].credit - NORM; }
+
+var MSHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+var MGEN = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+
+// сколько месяцев начислено с апреля 2026 по текущий месяц включительно
+function monthsAccrued() {
+  var d = new Date();
+  var k = (d.getFullYear() - FEE_START.y) * 12 + (d.getMonth() + 1 - FEE_START.m) + 1;
+  return Math.max(0, k);
+}
+function monthLabel(idx, gen) {
+  var t = FEE_START.m - 1 + idx;
+  return (gen ? MGEN : MSHORT)[t % 12] + ' ' + (FEE_START.y + Math.floor(t / 12));
+}
+function periodLabel(k) {
+  if (k <= 0) return 'ещё не начислено';
+  return k === 1 ? monthLabel(0) : monthLabel(0) + ' – ' + monthLabel(k - 1);
+}
+function nextDue() {
+  var d = new Date(), y = d.getFullYear(), m = d.getMonth();
+  if (d.getDate() > DUE_DAY) { m++; if (m > 11) { m = 0; y++; } }
+  return DUE_DAY + ' ' + MNAMES[m] + ' ' + y;
+}
+
+// новые взносы квартиры (из базы): на ежемесячную плату и на погашение старого долга ТСЖ
+function aptPaid(n, toTszh) {
+  return allTxs.filter(function(t) {
+    return t.apt === n && t.type === 'income' && !isHist(t.id) && t.cat === (toTszh ? CAT_TSZH : CAT_FEE);
+  }).reduce(function(s, t) { return s + t.amount; }, 0);
+}
+
+function aptNow(n) {
+  var a = APT[n];
+  var k = monthsAccrued();
+  var accrued = k * FEE;
+  var paid = aptPaid(n, false);
+  var credit = a.credit > 0 ? Math.max(0, baseBalance(n)) : 0;   // остаток зачёта на апрель 2026
+  var cover = paid + credit;
+  var feeDebt = Math.max(0, accrued - cover);
+  var monthsCovered = Math.floor(cover / FEE);
+  var creditLeft = a.credit > 0 ? Math.max(0, cover - accrued) : 0;
+  var collDebt = 0, collItems = [];
+  collections.forEach(function(c) {
+    if (!isPaid(c.id, n)) { var amt = Number(c.amount_per_apt) || 0; collDebt += amt; collItems.push({title: c.title, amt: amt}); }
+  });
+  var tszh = (a.credit > 0 || TSZH_CLOSED[n]) ? 0 : Math.min(0, baseBalance(n) + aptPaid(n, true));
+  return {
+    k: k, accrued: accrued, paid: paid, isCredit: a.credit > 0, credit: credit, creditLeft: creditLeft,
+    feeDebt: feeDebt, monthsCovered: monthsCovered,
+    paidThrough: monthsCovered > 0 ? monthLabel(monthsCovered - 1, true) : '',
+    collDebt: collDebt, collItems: collItems,
+    total: feeDebt + collDebt, tszh: tszh, cashTotal: a.cash + paid + aptPaid(n, true),
+    tszhDebt: -tszh, all: feeDebt + collDebt - tszh
+  };
+}
+
+function isPaid(cid, n) { return !!(collPay[cid] && collPay[cid][n]); }
+function collList(status) { return collections.filter(function(c) { return (c.status || 'active') === status; }); }
+function collStats(c) {
+  var p = 0;
+  APTS.forEach(function(n) { if (isPaid(c.id, n)) p++; });
+  var amt = Number(c.amount_per_apt) || 0;
+  return {paid: p, got: p * amt, total: APTS.length * amt, amt: amt};
+}
+function unpaidList(c) { return APTS.filter(function(n) { return !isPaid(c.id, n); }); }
+
+// ====================================================================
+// НАВИГАЦИЯ
+// ====================================================================
+function go(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  el(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 's-home') renderHome();
+  if (id === 's-admin') { renderAdminAll(); loadAll().then(renderAdminAll); }
+}
+
+function aTab(t) {
+  var tabs = ['tx', 'rcpt', 'coll', 'debt', 'pins', 'rep'];
+  tabs.forEach(function(id) { el('at-' + id).style.display = id === t ? 'block' : 'none'; });
+  document.querySelectorAll('.tabs .tab').forEach(function(b, i) { b.classList.toggle('active', tabs[i] === t); });
+  if (t === 'debt') renderDebt();
+  if (t === 'pins') renderPins();
+  if (t === 'coll') renderCollAdmin();
+  if (t === 'rcpt') renderRcptAdmin();
+  if (t === 'rep') genRep();
+}
+
+// ====================================================================
+// ГЛАВНАЯ
+// ====================================================================
+function collCardPublic(c) {
+  var s = collStats(c);
+  var pct = Math.round(s.paid / APTS.length * 100);
+  var h = '<div class="coll"><div class="coll-title">' + esc(c.title) + '</div>';
+  h += '<div class="coll-meta">' + fmt(s.amt) + ' с с квартиры' + (c.date_created ? ' · ' + fd(c.date_created) : '') + ' · сдали ' + s.paid + ' из ' + APTS.length + '</div>';
+  h += '<div class="bar"><div style="width:' + pct + '%"></div></div>';
+  h += '<div class="chips">';
+  APTS.forEach(function(n) {
+    var ok = isPaid(c.id, n);
+    h += '<span class="chip ' + (ok ? 'ok' : 'no') + '">Кв.' + n + (ok ? ' ✓' : ' ✗') + '</span>';
+  });
+  h += '</div>';
+  h += '<div class="coll-meta" style="margin-top:8px">Собрано: <b>' + fmt(s.got) + ' с</b> из ' + fmt(s.total) + ' с.</div></div>';
+  return h;
+}
+
+// расшифровка общего долга: [{label, amt}]
+function debtParts(now) {
+  var p = [];
+  if (now.feeDebt > 0) {
+    var unpaidM = Math.round(now.feeDebt / FEE);
+    p.push({label: 'Ежемесячная плата: ' + unpaidM + ' мес. × ' + fmt(FEE) + ' с' + (unpaidM === now.k ? ' (' + periodLabel(now.k) + ')' : ''), amt: now.feeDebt});
+  }
+  now.collItems.forEach(function(ci) { p.push({label: 'Сбор «' + ci.title + '»', amt: ci.amt}); });
+  if (now.tszhDebt > 0) p.push({label: 'Старый долг ТСЖ 2017–2024', amt: now.tszhDebt});
+  return p;
+}
+
+function aptBadge(now) {
+  if (now.all > 0) return {cls: 'b-no', label: 'Долг'};
+  if (now.isCredit) return {cls: 'b-over', label: 'Зачёт за ремонт'};
+  return {cls: 'b-ok', label: 'Оплачено'};
+}
+
+function debtsBlock() {
+  var k = monthsAccrued();
+  var h = '<div class="card" id="debts-card">';
+  h += '<div class="sec" style="margin-bottom:6px">Долги квартир на сегодня</div>';
+  h += '<div style="font-size:12px;color:#555;line-height:1.6;margin-bottom:10px">'
+    + '<b>Откуда берётся долг:</b><br>'
+    + '• <b>Ежемесячная плата</b> — ' + fmt(FEE) + ' с в месяц с квартиры, с апреля 2026. За ' + k + ' мес. (' + periodLabel(k) + ') начислено <b>' + fmt(k * FEE) + ' с</b> на квартиру. Срок оплаты — до ' + DUE_DAY + ' числа, ближайший — <b>' + nextDue() + '</b>.<br>'
+    + '• <b>Сборы</b> — разовые сборы на нужды подъезда, если квартира не сдала.<br>'
+    + '• <b>Старый долг ТСЖ</b> — недоплата за 2017–2024 по сводной таблице.</div>';
+  var tot = 0, tFee = 0, tColl = 0, tTszh = 0, cnt = 0;
+  APTS.forEach(function(n) {
+    var now = aptNow(n), parts = debtParts(now);
+    tot += now.all; tFee += now.feeDebt; tColl += now.collDebt; tTszh += now.tszhDebt; if (now.all > 0) cnt++;
+    var detail;
+    if (parts.length) detail = parts.map(function(x) { return esc(x.label) + ' — <b>' + fmt(x.amt) + ' с</b>'; }).join('<br>');
+    else detail = now.isCredit ? 'Плата списывается с зачёта за ремонт, остаток ' + fmt(now.creditLeft) + ' с' : 'Долгов нет';
+    if (now.isCredit && parts.length) detail += '<br><span style="color:#e65100">Ежемесячная плата списывается с зачёта, остаток ' + fmt(now.creditLeft) + ' с</span>';
+    var c = now.all > 0 ? '#c62828' : '#2e7d32';
+    h += '<div class="debt-row" style="align-items:flex-start"><div class="num-circle">' + n + '</div>'
+      + '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">' + esc(APT[n].owner) + '</div>'
+      + '<div style="font-size:11px;color:#777;line-height:1.6;margin-top:2px">' + detail + '</div></div>'
+      + '<div style="text-align:right;white-space:nowrap"><div style="font-size:10px;color:#999">итого</div><div style="font-weight:700;color:' + c + '">' + fmt(now.all) + ' с</div></div></div>';
+  });
+  h += '<div style="padding-top:10px;border-top:1px solid #e8e8e4;margin-top:4px;font-size:13px;line-height:1.7">'
+    + 'Всего должны: <b style="color:#c62828">' + fmt(tot) + ' с</b> · квартир с долгом: ' + cnt + ' из ' + APTS.length + '<br>'
+    + '<span style="font-size:12px;color:#777">из них ежемесячная плата ' + fmt(tFee) + ' с · сборы ' + fmt(tColl) + ' с · старые долги ТСЖ ' + fmt(tTszh) + ' с</span></div>';
+  h += '</div>';
+  return h;
+}
+
+function renderHome() {
+  var banner = '';
+  if (!dataOk) banner += '<div class="banner">Не удалось загрузить новые операции из базы. Показаны только исторические данные из файла — баланс может быть неточным. Попробуйте обновить страницу.</div>';
+  if (!collOk) banner += '<div class="banner">Сборы сейчас недоступны (нет связи с базой).</div>';
+  el('home-banner').innerHTML = banner;
+
+  var cb = cashBalance();
+  var balEl = el('h-bal');
+  balEl.textContent = fmt(cb.bal) + ' с';
+  balEl.style.color = cb.bal >= 0 ? '#2e7d32' : '#e53935';
+  el('h-exp').textContent = fmt(cb.exp) + ' с';
+  el('h-inc').textContent = fmt(cb.inc) + ' с';
+
+  var active = collList('active');
+  var ch = '';
+  if (active.length) {
+    ch += '<div class="sec">Текущие сборы</div>';
+    active.forEach(function(c) { ch += collCardPublic(c); });
+  }
+  el('home-colls').innerHTML = ch;
+  el('home-debts').innerHTML = debtsBlock();
+
+  var grid = '';
+  APTS.forEach(function(n) {
+    var a = APT[n], now = aptNow(n);
+    var badge = aptBadge(now);
+    var line = now.all > 0
+      ? '<div class="apt-bal" style="color:#c62828;font-size:13px">Общий долг: ' + fmt(now.all) + ' с</div>'
+      : '<div class="apt-bal" style="color:#2e7d32;font-size:13px">Долгов нет</div>';
+    var sm = [];
+    if (now.feeDebt > 0) sm.push('плата ' + fmt(now.feeDebt));
+    if (now.collDebt > 0) sm.push('сборы ' + fmt(now.collDebt));
+    if (now.tszhDebt > 0) sm.push('ТСЖ ' + fmt(now.tszhDebt));
+    if (now.isCredit) sm.push('зачёт ' + fmt(now.creditLeft));
+    var tszh = sm.length ? '<div class="apt-paid" style="color:#999">' + sm.join(' · ') + '</div>' : '';
+    grid += '<div class="apt-card" onclick="openApt(' + n + ')"><div>'
+      + '<div class="apt-name">Квартира ' + n + '</div>'
+      + '<div class="apt-owner">' + esc(a.owner) + '</div>'
+      + line + tszh + '</div>'
+      + '<span class="badge ' + badge.cls + '">' + badge.label + '</span></div>';
+  });
+  el('home-grid').innerHTML = grid;
+
+  var rows = '';
+  allTxs.slice().reverse().forEach(function(t) {
+    var inc = t.type === 'income';
+    var c = inc ? '#2e7d32' : '#e53935';
+    rows += '<div class="tx-item"><div class="dot" style="background:' + c + '"></div>'
+      + '<div class="tx-info"><div class="tx-desc">' + esc(t.description) + (t.apt ? ' <span style="color:#999;font-size:11px">(кв.' + t.apt + ')</span>' : '') + '</div>'
+      + '<div class="tx-sub">' + esc(t.cat || '') + ' · ' + fd(t.date) + '</div></div>'
+      + '<div class="tx-amt" style="color:' + c + '">' + (inc ? '+' : '−') + fmt(t.amount) + ' с</div></div>';
+  });
+  el('home-txlist').innerHTML = rows || '<div class="empty">Нет операций</div>';
+
+  var arch = collList('archived');
+  var ah = '';
+  if (arch.length) {
+    ah += '<div class="card"><details><summary>Архив сборов (' + arch.length + ')</summary>';
+    arch.slice().reverse().forEach(function(c) {
+      var s = collStats(c), un = unpaidList(c);
+      ah += '<div class="pay-row"><div class="pay-info"><div style="font-size:13px;font-weight:600">' + esc(c.title) + '</div>'
+        + '<div class="pay-note">' + fmt(s.amt) + ' с с квартиры' + (c.date_created ? ' · ' + fd(c.date_created) : '') + ' · сдали ' + s.paid + ' из ' + APTS.length + ' · собрано ' + fmt(s.got) + ' с'
+        + (un.length ? ' · не сдали: кв. ' + un.join(', ') : ' · сдали все') + '</div></div></div>';
+    });
+    ah += '</details></div>';
+  }
+  el('home-archive').innerHTML = ah;
+}
+
+// ====================================================================
+// ПИН-КОД КВАРТИРЫ
+// ====================================================================
+function openApt(n) {
+  currentApt = n; pinBuf = ''; updatePD();
+  el('pin-err').textContent = '';
+  el('pin-title').textContent = 'Квартира ' + n + ' — ' + APT[n].owner;
+  go('s-apt-pin');
+  loadSettings();
+}
+
+function updatePD() {
+  [0, 1, 2, 3].forEach(function(i) {
+    var d = el('pd' + i);
+    d.textContent = pinBuf.length > i ? '●' : '';
+    d.classList.toggle('filled', pinBuf.length > i);
+  });
+}
+
+function pk(k) {
+  el('pin-err').textContent = '';
+  if (k === 'c') { pinBuf = ''; updatePD(); return; }
+  if (k === 'd') { pinBuf = pinBuf.slice(0, -1); updatePD(); return; }
+  if (pinBuf.length >= 4) return;
+  pinBuf += k; updatePD();
+  if (pinBuf.length === 4) {
+    var ok = pinBuf === aptPins[currentApt];
+    pinBuf = ''; updatePD();
+    if (ok) {
+      el('pin-err').textContent = 'Загрузка...';
+      loadAll().then(function() { showAptView(currentApt); });
+    } else {
+      el('pin-err').textContent = 'Неверный пин-код. Попробуйте ещё раз.';
+    }
+  }
+}
+
+// ====================================================================
+// ПОРТФОЛИО КВАРТИРЫ
+// ====================================================================
+function refreshApt() {
+  loadAll().then(function() { showAptView(currentApt); toast('Обновлено'); });
+}
+
+function showAptView(n) {
+  var a = APT[n], now = aptNow(n);
+
+  el('av-ini').textContent = 'К' + n;
+  el('av-title').textContent = 'Квартира ' + n;
+  el('av-owner').textContent = a.owner;
+  el('av-addr').textContent = a.addr;
+  var third = now.isCredit
+    ? '<div class="metric"><div class="metric-label">Остаток зачёта</div><div class="metric-value" style="color:#e65100">' + fmt(now.creditLeft) + ' с</div></div>'
+    : '<div class="metric"><div class="metric-label">Недоплата ТСЖ 2017–24</div><div class="metric-value" style="color:' + (now.tszh < 0 ? '#888' : '#2e7d32') + '">' + (now.tszh < 0 ? fmt(-now.tszh) + ' с' : '0') + '</div></div>';
+  el('av-metrics').innerHTML =
+    '<div class="metric"><div class="metric-label">Общий долг</div><div class="metric-value" style="color:' + (now.all > 0 ? '#c62828' : '#2e7d32') + '">' + fmt(now.all) + ' с</div></div>'
+    + '<div class="metric"><div class="metric-label">Внесено ежемес. платы</div><div class="metric-value" style="color:#1565c0">' + fmt(now.paid) + ' с</div></div>'
+    + third;
+  var parts = debtParts(now);
+  var bd = '<div class="sbox ' + (parts.length ? 's-bad' : 's-ok') + '"><b>Из чего складывается долг:</b><br>';
+  bd += parts.length ? parts.map(function(x) { return esc(x.label) + ' — <b>' + fmt(x.amt) + ' с</b>'; }).join('<br>') + '<br><b>Итого: ' + fmt(now.all) + ' с</b>' : 'Долгов нет.';
+  bd += '</div>';
+
+  var sbx = bd;
+  if (!dataOk) sbx += '<div class="banner">Не удалось загрузить новые взносы из базы — суммы могут быть неполными. Нажмите «Обновить».</div>';
+  var feeTxt = 'Ежемесячная плата: начислено ' + now.k + ' мес. (' + periodLabel(now.k) + ') × ' + fmt(FEE) + ' с = ' + fmt(now.accrued) + ' с. ';
+  if (TSZH_CLOSED[n]) sbx += '<div class="sbox s-ok">✓ ' + esc(TSZH_CLOSED[n]) + '</div>';
+  if (now.isCredit) {
+    feeTxt += 'Плата списывается с зачёта за ремонт: остаток зачёта ' + fmt(now.creditLeft) + ' с.';
+    sbx += '<div class="sbox s-warn">' + feeTxt + '</div>';
+  } else if (now.feeDebt > 0) {
+    feeTxt += 'Оплачено ' + fmt(now.paid) + ' с. Долг ' + fmt(now.feeDebt) + ' с. Срок оплаты — до ' + DUE_DAY + ' числа каждого месяца, ближайший — ' + nextDue() + '.';
+    sbx += '<div class="sbox s-bad">' + feeTxt + '</div>';
+  } else {
+    feeTxt += 'Оплачено ' + fmt(now.paid) + ' с — долга нет' + (now.paidThrough ? ', оплачено до ' + now.paidThrough + ' включительно' : '') + '.';
+    sbx += '<div class="sbox s-ok">' + feeTxt + '</div>';
+  }
+  if (a.note) {
+    var cls = {ok: 's-ok', warn: 's-warn', bad: 's-bad', info: 's-info'}[a.noteType] || 's-info';
+    sbx += '<div class="sbox ' + cls + '">' + esc(a.note) + '</div>';
+  }
+  var cs = collections.slice().sort(function(x, y) { return (x.status === 'active' ? 0 : 1) - (y.status === 'active' ? 0 : 1); });
+  cs.forEach(function(c) {
+    var amt = Number(c.amount_per_apt) || 0;
+    var tag = c.status === 'archived' ? ' (архив)' : '';
+    if (isPaid(c.id, n)) sbx += '<div class="sbox s-ok">✓ Сбор «' + esc(c.title) + '»' + tag + ' — сдано ' + fmt(amt) + ' с</div>';
+    else sbx += '<div class="sbox s-bad">✗ Сбор «' + esc(c.title) + '»' + tag + ' — не сдано, ' + fmt(amt) + ' с</div>';
+  });
+  el('av-status-box').innerHTML = sbx;
+  el('av-months').innerHTML = monthChips(n);
+  var rl = receiptsOf(n);
+  el('av-rcpts').innerHTML = rl.length ? rl.slice().reverse().map(rcptRow).join('') : '<div style="font-size:12px;color:#999;padding:4px 0">Квитанций пока нет' + (now.isCredit ? ' — плата списывается с зачёта за ремонт' : '') + '.</div>';
+
+  var newTxs = allTxs.filter(function(t) { return t.apt === n && t.type === 'income' && !isHist(t.id); })
+    .map(function(t) { return {date: fd(t.date), period: t.description, amt: t.amount, isCredit: false, note: t.cat || 'Новый взнос'}; });
+  var all = a.payments.concat(newTxs);
+  var ph = '';
+  all.slice().reverse().forEach(function(p) {
+    var c = p.isCredit ? '#e65100' : '#2e7d32';
+    ph += '<div class="pay-row"><div class="dot" style="background:' + c + '"></div>'
+      + '<div class="pay-info"><div style="font-size:13px;font-weight:600">' + esc(p.period) + '</div>'
+      + (p.note ? '<div class="pay-note">' + esc(p.note) + '</div>' : '')
+      + '<div style="font-size:11px;color:#bbb;margin-top:2px">' + esc(p.date) + '</div></div>'
+      + '<div style="font-weight:700;font-size:13px;color:' + c + ';white-space:nowrap">' + (p.isCredit ? '≈ ' : '+') + fmt(p.amt) + ' с</div></div>';
+  });
+  el('av-paylist').innerHTML = ph || '<div class="empty">Нет данных</div>';
+
+  var exps = allTxs.filter(function(t) { return t.type === 'expense'; });
+  var totalExp = exps.reduce(function(s, t) { return s + t.amount; }, 0);
+  var eh = '';
+  exps.slice(-6).reverse().forEach(function(t) {
+    eh += '<div class="pay-row"><div class="dot" style="background:#e53935"></div>'
+      + '<div class="pay-info"><div style="font-size:13px">' + esc(t.description) + '</div><div style="font-size:11px;color:#bbb">' + esc(t.cat || '') + ' · ' + fd(t.date) + '</div></div>'
+      + '<div style="font-size:12px;color:#888;white-space:nowrap;font-weight:600">−' + fmt(Math.round(t.amount / 10)) + ' с</div></div>';
+  });
+  eh += '<div style="padding-top:10px;font-size:13px;border-top:1px solid #f0f0ec;margin-top:4px">Ваша доля (1/10) от всех расходов за всё время: <b style="color:#e53935">' + fmt(Math.round(totalExp / 10)) + ' с</b></div>';
+  el('av-explist').innerHTML = eh;
+
+  go('s-apt-view');
+}
+
+// ====================================================================
+// ПИН-КОД АДМИНИСТРАТОРА
+// ====================================================================
+function updateAPD() {
+  [0, 1, 2, 3].forEach(function(i) {
+    var d = el('apd' + i);
+    d.textContent = apinBuf.length > i ? '●' : '';
+    d.classList.toggle('filled', apinBuf.length > i);
+  });
+}
+
+function apk(k) {
+  el('apin-err').textContent = '';
+  if (k === 'c') { apinBuf = ''; updateAPD(); return; }
+  if (k === 'd') { apinBuf = apinBuf.slice(0, -1); updateAPD(); return; }
+  if (apinBuf.length >= 4) return;
+  apinBuf += k; updateAPD();
+  if (apinBuf.length === 4) {
+    var ok = apinBuf === adminPin;
+    apinBuf = ''; updateAPD();
+    if (ok) go('s-admin');
+    else el('apin-err').textContent = 'Неверный пин-код';
+  }
+}
+
+// ====================================================================
+// ПАНЕЛЬ СТАРШЕГО — ОПЕРАЦИИ
+// ====================================================================
+function renderAdminAll() {
+  var opts = '<option value="">— общая операция —</option>';
+  APTS.forEach(function(n) { opts += '<option value="' + n + '">Кв. ' + n + ' — ' + esc(APT[n].owner) + '</option>'; });
+  var sel = el('tx-apt'), cur = sel.value;
+  sel.innerHTML = opts; sel.value = cur;
+  el('tx-count').textContent = allTxs.length;
+  var rows = '';
+  allTxs.slice().reverse().forEach(function(t) {
+    var inc = t.type === 'income';
+    var c = inc ? '#2e7d32' : '#e53935';
+    var del = isHist(t.id) ? '' : '<button class="tx-del" title="Удалить" onclick="delTx(&quot;' + esc(t.id) + '&quot;)">×</button>';
+    var mv = '';
+    if (!isHist(t.id) && inc && t.apt && !RCPT_RE.test(t.description || '')) {
+      var bs = 'class="btn btn-sm" style="margin:6px 6px 0 0;padding:4px 8px;font-size:11px"';
+      var bFee = '<button ' + bs + ' onclick="setTxCat(&quot;' + esc(t.id) + '&quot;,&quot;' + CAT_FEE + '&quot;)">Это ежемесячная плата</button>';
+      var bTszh = '<button ' + bs + ' onclick="setTxCat(&quot;' + esc(t.id) + '&quot;,&quot;' + CAT_TSZH + '&quot;)">Это погашение старого долга ТСЖ</button>';
+      var bOther = '<button ' + bs + ' onclick="setTxCat(&quot;' + esc(t.id) + '&quot;,&quot;Прочее&quot;)">Это другой взнос</button>';
+      if (t.cat === CAT_FEE) mv = '<div>' + bTszh + bOther + '</div>';
+      else if (t.cat === CAT_TSZH) mv = '<div>' + bFee + bOther + '</div>';
+      else mv = '<div style="font-size:11px;color:#999;margin-top:4px">Не влияет на долг квартиры.</div><div>' + bFee + bTszh + '</div>';
+    }
+    rows += '<div class="tx-item"><div class="dot" style="background:' + c + '"></div>'
+      + '<div class="tx-info"><div class="tx-desc">' + esc(t.description) + (t.apt ? ' <span style="color:#999;font-size:11px">(кв.' + t.apt + ')</span>' : '') + '</div>'
+      + '<div class="tx-sub">' + esc(t.cat || '') + ' · ' + fd(t.date) + '</div>' + mv + '</div>'
+      + '<div class="tx-amt" style="color:' + c + '">' + (inc ? '+' : '−') + fmt(t.amount) + ' с</div>' + del + '</div>';
+  });
+  el('admin-txlist').innerHTML = rows || '<div class="empty">Нет операций</div>';
+  renderCollAdmin();
+  if (el('at-rcpt').style.display !== 'none') renderRcptAdmin();
+}
+
+function syncCat() {
+  var t = el('tx-type').value, a = el('tx-apt').value, c = el('tx-cat');
+  if (t === 'income' && a && c.value !== CAT_TSZH) c.value = CAT_FEE;
+  if (t === 'expense' && (c.value === CAT_FEE || c.value === CAT_TSZH)) c.value = 'Дворник';
+}
+
+function addTx() {
+  var desc = el('tx-desc').value.trim();
+  var amount = parseFloat(el('tx-amt').value);
+  var type = el('tx-type').value;
+  var date = el('tx-date').value || today();
+  var cat = el('tx-cat').value;
+  var aptV = el('tx-apt').value;
+  if (!desc || !amount || amount <= 0) { alert('Заполните описание и сумму'); return; }
+  if (type === 'income' && (cat === CAT_FEE || cat === CAT_TSZH) && !aptV) { alert('Выберите квартиру, от которой пришла оплата'); return; }
+  var tx = {id: 'u' + Date.now(), description: desc, amount: amount, type: type, date: date, cat: cat, apt: aptV ? parseInt(aptV, 10) : null};
+  sb('POST', 'transactions', tx, 'return=minimal').then(sbOk).then(function() {
+    toast('Операция добавлена');
+    el('tx-desc').value = ''; el('tx-amt').value = '';
+    return loadTxs();
+  }).then(function() { renderAdminAll(); renderHome(); })
+    .catch(function() { alert('Не удалось сохранить операцию. Проверьте интернет и повторите.'); });
+}
+
+function setTxCat(id, cat) {
+  sb('PATCH', 'transactions?id=eq.' + encodeURIComponent(id), {cat: cat}, 'return=minimal').then(sbOk).then(function() {
+    toast(cat === CAT_TSZH ? 'Взнос засчитан в погашение долга ТСЖ' : (cat === CAT_FEE ? 'Взнос засчитан в ежемесячную плату' : 'Взнос больше не влияет на долг квартиры'));
+    return loadTxs();
+  }).then(function() { renderAdminAll(); renderHome(); })
+    .catch(function() { alert('Не удалось изменить категорию.'); });
+}
+
+function delTx(id) {
+  if (!confirm('Удалить эту запись?')) return;
+  sb('DELETE', 'transactions?id=eq.' + encodeURIComponent(id)).then(sbOk).then(function() {
+    toast('Удалено');
+    return loadTxs();
+  }).then(function() { renderAdminAll(); renderHome(); })
+    .catch(function() { alert('Не удалось удалить.'); });
+}
+
+// ====================================================================
+// ПАНЕЛЬ СТАРШЕГО — СБОРЫ
+// ====================================================================
+function renderCollAdmin() {
+  var host = el('coll-active'), arch = el('coll-archive');
+  if (!collOk) {
+    host.innerHTML = '<div class="banner">Таблицы сборов не найдены или нет связи с базой. Запустите SQL для таблиц collections и collection_payments в Supabase.</div>';
+    arch.innerHTML = '';
+    return;
+  }
+  var act = collList('active'), ar = collList('archived');
+  var h = '';
+  act.forEach(function(c) {
+    var s = collStats(c), q = '&quot;' + esc(c.id) + '&quot;';
+    h += '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:10px">'
+      + '<div><div style="font-size:14px;font-weight:700">' + esc(c.title) + '</div>'
+      + '<div style="font-size:11px;color:#888">' + fmt(s.amt) + ' с с квартиры' + (c.date_created ? ' · ' + fd(c.date_created) : '') + '</div></div>'
+      + '<div style="text-align:right;font-size:12px;color:#666">Сдали <b>' + s.paid + '/' + APTS.length + '</b><br>' + fmt(s.got) + ' из ' + fmt(s.total) + ' с</div></div>';
+    h += '<div class="apt-grid" style="margin-bottom:8px">';
+    APTS.forEach(function(n) {
+      var ok = isPaid(c.id, n);
+      h += '<div class="apt-card" onclick="togglePaid(' + q + ',' + n + ')"><div><div class="apt-name">Кв. ' + n + '</div><div class="apt-owner">' + esc(APT[n].owner.split(' ')[0]) + '</div></div>'
+        + '<span class="badge ' + (ok ? 'b-ok' : 'b-no') + '">' + (ok ? '✓ Сдал' : 'Не сдал') + '</span></div>';
+    });
+    h += '</div>';
+    if (s.paid === APTS.length) h += '<div class="sbox s-ok">Все сдали — сбор можно отправить в архив.</div>';
+    h += '<div class="coll-actions"><button class="btn btn-sm btn-primary" onclick="setCollStatus(' + q + ',&quot;archived&quot;)">Завершить и в архив</button>'
+      + '<button class="btn btn-sm btn-danger" onclick="delColl(' + q + ')">Удалить</button></div></div>';
+  });
+  host.innerHTML = h || '<div class="empty">Активных сборов нет</div>';
+
+  var ah = '';
+  ar.slice().reverse().forEach(function(c) {
+    var s = collStats(c), un = unpaidList(c), q = '&quot;' + esc(c.id) + '&quot;';
+    ah += '<div class="card"><div style="font-size:14px;font-weight:700">' + esc(c.title) + '</div>'
+      + '<div style="font-size:11px;color:#888;margin:2px 0 6px">' + fmt(s.amt) + ' с с квартиры' + (c.date_created ? ' · ' + fd(c.date_created) : '') + ' · сдали ' + s.paid + '/' + APTS.length + ' · собрано ' + fmt(s.got) + ' с'
+      + (un.length ? ' · не сдали: кв. ' + un.join(', ') : '') + '</div>'
+      + '<div class="coll-actions"><button class="btn btn-sm" onclick="setCollStatus(' + q + ',&quot;active&quot;)">Вернуть в активные</button>'
+      + '<button class="btn btn-sm btn-danger" onclick="delColl(' + q + ')">Удалить</button></div></div>';
+  });
+  arch.innerHTML = ah || '<div class="empty">Архив пуст</div>';
+}
+
+function createColl() {
+  var title = el('c-title').value.trim();
+  var amt = parseFloat(el('c-amt').value);
+  var date = el('c-date').value || today();
+  if (!title || !amt || amt <= 0) { alert('Укажите название и сумму'); return; }
+  var id = 'c' + Date.now();
+  var rows = APTS.map(function(n) { return {collection_id: id, apt: n, paid: false}; });
+  sb('POST', 'collections', {id: id, title: title, amount_per_apt: amt, date_created: date, status: 'active'}, 'return=minimal').then(sbOk)
+    .then(function() { return sb('POST', 'collection_payments', rows, 'return=minimal'); }).then(sbOk)
+    .then(function() { el('c-title').value = ''; el('c-amt').value = ''; toast('Сбор создан'); return loadColls(); })
+    .then(function() { renderCollAdmin(); renderHome(); })
+    .catch(function() { alert('Не удалось создать сбор.'); });
+}
+
+function togglePaid(cid, n) {
+  var cur = isPaid(cid, n), nv = !cur;
+  if (!collPay[cid]) collPay[cid] = {};
+  collPay[cid][n] = nv;
+  renderCollAdmin();
+  sb('POST', 'collection_payments?on_conflict=collection_id,apt', {collection_id: cid, apt: n, paid: nv}, 'resolution=merge-duplicates,return=minimal')
+    .then(sbOk).then(function() { renderHome(); })
+    .catch(function() { collPay[cid][n] = cur; renderCollAdmin(); toast('Не удалось сохранить отметку'); });
+}
+
+function setCollStatus(cid, status) {
+  sb('PATCH', 'collections?id=eq.' + encodeURIComponent(cid), {status: status}, 'return=minimal').then(sbOk)
+    .then(function() { toast(status === 'archived' ? 'Сбор в архиве' : 'Сбор возвращён'); return loadColls(); })
+    .then(function() { renderCollAdmin(); renderHome(); })
+    .catch(function() { alert('Не удалось изменить статус.'); });
+}
+
+function delColl(cid) {
+  if (!confirm('Удалить сбор вместе со всеми отметками? Это нельзя отменить. Чтобы сохранить историю, лучше отправьте его в архив.')) return;
+  sb('DELETE', 'collection_payments?collection_id=eq.' + encodeURIComponent(cid)).then(sbOk)
+    .then(function() { return sb('DELETE', 'collections?id=eq.' + encodeURIComponent(cid)); }).then(sbOk)
+    .then(function() { toast('Удалено'); return loadColls(); })
+    .then(function() { renderCollAdmin(); renderHome(); })
+    .catch(function() { alert('Не удалось удалить.'); });
+}
+
+// ====================================================================
+// КВИТАНЦИИ
+// Квитанция хранится как поступление (type income, cat «Ежемесячная плата», id «r…»),
+// описание: «Квитанция №5 · апр 2026 – июн 2026 · 3 мес.»
+// ====================================================================
+var RCPT_RE = /^Квитанция №(\d+) · (.+) · (\d+) мес\.$/;
+var rcptBack = 's-home', rcptText = '';
+
+function allReceipts() {
+  var out = [];
+  allTxs.forEach(function(t) {
+    if (isHist(t.id) || t.type !== 'income') return;
+    var m = RCPT_RE.exec(t.description || '');
+    if (m) out.push({id: t.id, no: parseInt(m[1], 10), period: m[2], months: parseInt(m[3], 10), amount: t.amount, date: t.date, apt: t.apt});
+  });
+  return out.sort(function(a, b) { return a.no - b.no; });
+}
+function receiptsOf(n) { return allReceipts().filter(function(r) { return r.apt === n; }); }
+function nextReceiptNo() { return allReceipts().reduce(function(m, r) { return Math.max(m, r.no); }, 0) + 1; }
+
+function rcptRow(r) {
+  return '<div class="rcpt-item" onclick="openReceipt(&quot;' + esc(r.id) + '&quot;)">'
+    + '<div><div style="font-weight:600">Квитанция №' + r.no + '</div><div style="font-size:11px;color:#999">' + fd(r.date) + ' · кв. ' + r.apt + ' · ' + esc(r.period) + '</div></div>'
+    + '<div style="font-weight:700;color:#2e7d32;white-space:nowrap">+' + fmt(r.amount) + ' с ›</div></div>';
+}
+
+// статус каждого начисленного месяца: 'ok' оплачен, 'cr' покрыт зачётом, 'no' не оплачен
+function monthStatus(n) {
+  var now = aptNow(n), paidM = Math.floor(now.paid / FEE), creditM = Math.floor(now.credit / FEE), out = [];
+  for (var i = 0; i < now.k; i++) out.push(i < creditM ? 'cr' : (i < creditM + paidM ? 'ok' : 'no'));
+  return out;
+}
+function monthChips(n) {
+  var st = monthStatus(n);
+  if (!st.length) return '<div style="font-size:12px;color:#999">Начислений ещё нет.</div>';
+  var h = '<div class="mchips">';
+  st.forEach(function(x, i) {
+    var cls = x === 'no' ? 'no' : 'ok', mark = x === 'no' ? ' ✗' : (x === 'cr' ? ' З' : ' ✓');
+    h += '<span class="chip ' + cls + '">' + monthLabel(i) + mark + '</span>';
+  });
+  return h + '</div>';
+}
+
+function renderRcptAdmin() {
+  var sel = el('r-apt'), cur = sel.value || '1', o = '';
+  APTS.forEach(function(n) { o += '<option value="' + n + '">Кв. ' + n + ' — ' + esc(APT[n].owner) + '</option>'; });
+  sel.innerHTML = o; sel.value = cur;
+  if (!el('r-date').value) el('r-date').value = today();
+  renderRcptForm();
+  var k = monthsAccrued(), g = '<table class="mgrid"><tr><th>Кв.</th>';
+  for (var i = 0; i < k; i++) g += '<th>' + monthLabel(i) + '</th>';
+  g += '<th>Долг</th></tr>';
+  APTS.forEach(function(n) {
+    var st = monthStatus(n), now = aptNow(n);
+    g += '<tr><th>' + n + '</th>';
+    st.forEach(function(x) { g += x === 'ok' ? '<td class="m-ok">✓</td>' : (x === 'cr' ? '<td class="m-cr">З</td>' : '<td class="m-no">✗</td>'); });
+    g += '<td style="font-weight:700;color:' + (now.feeDebt > 0 ? '#c62828' : '#2e7d32') + '">' + fmt(now.feeDebt) + '</td></tr>';
+  });
+  el('r-grid').innerHTML = g + '</table>';
+  var rl = allReceipts();
+  el('r-list').innerHTML = rl.length ? rl.slice().reverse().map(rcptRow).join('') : '<div class="empty">Квитанций пока нет</div>';
+}
+
+function rcptStart(n) { return Math.floor(aptPaid(n, false) / FEE); }
+
+function renderRcptForm() {
+  var n = parseInt(el('r-apt').value, 10), now = aptNow(n), btn = el('r-issue');
+  if (now.isCredit) {
+    el('r-owed').innerHTML = '<span style="color:#e65100">Кв. ' + n + ' не платит деньгами: плата списывается с зачёта за ремонт (остаток ' + fmt(now.creditLeft) + ' с). Квитанция не нужна.</span>';
+    el('r-count').innerHTML = ''; el('r-sum').value = ''; el('r-period').innerHTML = ''; btn.disabled = true; btn.style.opacity = .4;
+    return;
+  }
+  btn.disabled = false; btn.style.opacity = 1;
+  var start = rcptStart(n), owed = Math.max(0, now.k - start);
+  el('r-owed').innerHTML = owed > 0
+    ? 'Не оплачено: <b style="color:#c62828">' + monthLabel(start) + (owed > 1 ? ' – ' + monthLabel(start + owed - 1) : '') + '</b> (' + owed + ' мес., ' + fmt(owed * FEE) + ' с).'
+    : '<span style="color:#2e7d32">Долга нет' + (start > 0 ? ', оплачено до ' + monthLabel(start - 1, true) + ' включительно' : '') + '. Можно принять оплату вперёд.</span>';
+  var o = '', def = Math.max(1, owed);
+  for (var c = 1; c <= owed + 12; c++) o += '<option value="' + c + '"' + (c === def ? ' selected' : '') + '>' + c + ' мес.' + (c === owed ? ' (весь долг)' : '') + '</option>';
+  el('r-count').innerHTML = o;
+  renderRcptSum();
+}
+
+function renderRcptSum() {
+  var n = parseInt(el('r-apt').value, 10), c = parseInt(el('r-count').value, 10) || 0, start = rcptStart(n);
+  el('r-sum').value = fmt(c * FEE);
+  el('r-period').innerHTML = c ? 'Период в квитанции: <b>' + monthLabel(start) + (c > 1 ? ' – ' + monthLabel(start + c - 1) : '') + '</b>' : '';
+}
+
+function issueReceipt() {
+  var n = parseInt(el('r-apt').value, 10), c = parseInt(el('r-count').value, 10);
+  if (!n || !c) { alert('Выберите квартиру и количество месяцев'); return; }
+  var start = rcptStart(n), no = nextReceiptNo();
+  var period = monthLabel(start) + (c > 1 ? ' – ' + monthLabel(start + c - 1) : '');
+  var tx = {id: 'r' + Date.now(), description: 'Квитанция №' + no + ' · ' + period + ' · ' + c + ' мес.', type: 'income', amount: c * FEE,
+    date: el('r-date').value || today(), cat: CAT_FEE, apt: n};
+  el('r-issue').disabled = true;
+  sb('POST', 'transactions', tx, 'return=minimal').then(sbOk).then(function() { return loadTxs(); })
+    .then(function() {
+      el('r-issue').disabled = false;
+      renderRcptAdmin(); renderAdminAll(); renderHome();
+      toast('Квитанция №' + no + ' выписана');
+      openReceipt(tx.id);
+    })
+    .catch(function() { el('r-issue').disabled = false; alert('Не удалось выписать квитанцию. Проверьте интернет и повторите.'); });
+}
+
+function openReceipt(id) {
+  var r = allReceipts().filter(function(x) { return x.id === id; })[0];
+  if (!r) return;
+  var a = APT[r.apt];
+  rcptBack = el('s-apt-view').classList.contains('active') ? 's-apt-view' : (el('s-admin').classList.contains('active') ? 's-admin' : 's-home');
+  var lastIdx = -1, mm = r.period.split(' – ');
+  var h = '<div class="rcpt">'
+    + '<div class="rcpt-head"><div class="rcpt-no">КВИТАНЦИЯ № ' + r.no + '</div><div style="font-size:13px">' + fd(r.date) + '</div></div>'
+    + '<div style="font-size:12px;color:#555;margin-bottom:8px">Касса подъезда №1 · Логвиненко 24/1</div>'
+    + '<div class="rcpt-line"><span>Квартира №</span><b>' + r.apt + '</b></div>'
+    + '<div class="rcpt-line"><span>Ф. И. О.</span><b>' + esc(a.owner) + '</b></div>'
+    + '<div class="rcpt-line"><span>Адрес</span><b>' + esc(a.addr) + '</b></div>'
+    + '<table class="rcpt-tbl"><tr><th>Вид платежа</th><th>Период</th><th>Сумма</th></tr>'
+    + '<tr><td>Ежемесячная плата<br><span style="font-size:11px;color:#666">' + fmt(FEE) + ' с × ' + r.months + ' мес.</span></td><td>' + esc(r.period) + '</td><td style="white-space:nowrap">' + fmt(r.amount) + ' с</td></tr></table>'
+    + '<div class="rcpt-total"><span>Всего:</span><span>' + fmt(r.amount) + ' сом</span></div>'
+    + '<div class="rcpt-sign">Принял: Эржан, старший по подъезду</div>'
+    + '</div>';
+  el('rcpt-body').innerHTML = h;
+  rcptText = 'КВИТАНЦИЯ № ' + r.no + '\nКасса подъезда №1, Логвиненко 24/1\nДата: ' + fd(r.date)
+    + '\nКв. ' + r.apt + ' — ' + a.owner
+    + '\nЕжемесячная плата: ' + r.period + ' (' + r.months + ' мес. × ' + FEE + ' с)'
+    + '\nСумма: ' + fmt(r.amount) + ' с'
+    + '\nПринял: Эржан, старший по подъезду';
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  el('s-receipt').classList.add('active');
+  window.scrollTo(0, 0);
+}
+function closeReceipt() {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  el(rcptBack).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function copyReceipt() { window._rep = rcptText; copyReport(); }
+
+// ====================================================================
+// ПАНЕЛЬ СТАРШЕГО — ДОЛГИ ТСЖ, ПИН-КОДЫ, ОТЧЁТ
+// ====================================================================
+function renderDebt() {
+  var rows = '', totalDebt = 0, totalSurplus = 0;
+  APTS.forEach(function(n) {
+    var a = APT[n], bal = a.credit > 0 ? baseBalance(n) : -aptNow(n).tszhDebt, pos = bal >= 0;
+    var color = pos ? '#2e7d32' : '#e53935';
+    if (pos) totalSurplus += bal; else totalDebt += Math.abs(bal);
+    rows += '<div class="debt-row"><div class="num-circle">' + n + '</div>'
+      + '<div style="flex:1"><div style="font-weight:600;font-size:13px">' + esc(a.owner) + '</div>'
+      + '<div style="font-size:11px;color:#999">деньгами: ' + fmt(a.cash) + ' с' + (a.credit > 0 ? ' + зачёт ' + fmt(a.credit) + ' с' : '') + '</div></div>'
+      + '<div style="text-align:right"><div style="font-weight:700;color:' + color + '">' + (bal > 0 ? '+' : '') + fmt(bal) + ' с</div>'
+      + '<div style="font-size:11px;color:' + color + '">' + (TSZH_CLOSED[n] ? 'закрыт' : (pos ? (bal === 0 ? 'нет долга' : 'переплата') : 'долг')) + '</div></div></div>';
+  });
+  el('debt-list').innerHTML = rows;
+  el('debt-summary').innerHTML = 'Общий долг: <b style="color:#e53935">' + fmt(totalDebt) + ' с</b> &nbsp;·&nbsp; Переплата работами: <b style="color:#2e7d32">' + fmt(totalSurplus) + ' с</b>';
+}
+
+function renderPins() {
+  var h = '';
+  APTS.forEach(function(n) {
+    h += '<div class="pin-row"><label>Кв. ' + n + ' — ' + esc(APT[n].owner.split(' ')[0]) + '</label><input type="text" id="pn-' + n + '" maxlength="4" value="' + esc(aptPins[n] || '') + '"></div>';
+  });
+  el('pin-setup').innerHTML = h;
+}
+
+function savePins() {
+  var np = {};
+  var bad = false;
+  APTS.forEach(function(n) {
+    var v = el('pn-' + n).value.trim();
+    if (!/^\d{4}$/.test(v)) bad = true;
+    np[n] = v;
+  });
+  if (bad) { alert('Каждый пин-код должен состоять из 4 цифр'); return; }
+  sb('POST', 'settings?on_conflict=key', {key: 'apt_pins', value: JSON.stringify(np)}, 'resolution=merge-duplicates,return=minimal').then(sbOk)
+    .then(function() { aptPins = np; toast('Пин-коды сохранены для всех устройств'); })
+    .catch(function() { alert('Не удалось сохранить пин-коды.'); });
+}
+
+function saveAPin() {
+  var v = el('apin-new').value.trim();
+  if (!/^\d{4}$/.test(v)) { alert('Пин должен быть 4 цифры'); return; }
+  sb('POST', 'settings?on_conflict=key', {key: 'admin_pin', value: v}, 'resolution=merge-duplicates,return=minimal').then(sbOk)
+    .then(function() { adminPin = v; el('apin-new').value = ''; toast('Пин администратора изменён'); })
+    .catch(function() { alert('Не удалось сохранить пин.'); });
+}
+
+function genRep() {
+  var cb = cashBalance();
+  var totalExp = 0, cats = {};
+  allTxs.forEach(function(t) {
+    if (t.type === 'expense') { totalExp += t.amount; cats[t.cat || 'Прочее'] = (cats[t.cat || 'Прочее'] || 0) + t.amount; }
+  });
+  var d = new Date();
+  var L = [];
+  L.push('ОТЧЁТ КАССЫ ПОДЪЕЗДА №1');
+  L.push('Логвиненко 24/1');
+  L.push(d.getDate() + ' ' + MNAMES[d.getMonth()] + ' ' + d.getFullYear());
+  L.push('————————————————————');
+  L.push('Баланс в кассе: ' + fmt(cb.bal) + ' с');
+  L.push('(остаток 28 668 с на 15.04.2026, новые расходы ' + fmt(cb.exp) + ' с, новые доходы ' + fmt(cb.inc) + ' с)');
+  L.push('Расходы за всё время: ' + fmt(totalExp) + ' с');
+  L.push('');
+  L.push('Расходы по категориям:');
+  Object.keys(cats).forEach(function(k) { L.push('  • ' + k + ': ' + fmt(cats[k]) + ' с'); });
+  var act = collList('active');
+  if (act.length) {
+    L.push('');
+    L.push('Текущие сборы (отдельно от кассы):');
+    act.forEach(function(c) {
+      var s = collStats(c), un = unpaidList(c);
+      L.push('  • ' + c.title + ' — ' + fmt(s.amt) + ' с с квартиры, сдали ' + s.paid + '/' + APTS.length + (un.length ? ', не сдали: кв. ' + un.join(', ') : ', сдали все'));
+    });
+  }
+  var k = monthsAccrued(), tot = 0;
+  L.push('');
+  L.push('Ежемесячная плата: ' + FEE + ' с с квартиры, с апреля 2026, срок — до ' + DUE_DAY + ' числа.');
+  L.push('Начислено ' + k + ' мес. (' + periodLabel(k) + ') = ' + fmt(k * FEE) + ' с на квартиру.');
+  L.push('Общий долг квартир на сегодня (плата + сборы + старый долг ТСЖ):');
+  APTS.forEach(function(n) { var nw = aptNow(n); tot += nw.all; if (nw.all > 0) L.push('  Кв.' + n + ' — ' + APT[n].owner + ': ' + fmt(nw.all) + ' с (' + debtParts(nw).map(function(x) { return x.label.split(':')[0].replace('Сбор ', '') + ' ' + fmt(x.amt); }).join(', ') + ')'); });
+  L.push('  Всего: ' + fmt(tot) + ' с. Кв. 5, 9, 10 — плата списывается с зачёта за ремонт.');
+  L.push('Ближайший срок оплаты: ' + nextDue() + '.');
+  L.push('');
+  L.push('Из них старый долг ТСЖ 2017–2024 (с учётом погашений):');
+  APTS.forEach(function(n) { var d = aptNow(n).tszhDebt; if (d > 0) L.push('  Кв.' + n + ' — ' + APT[n].owner + ': ' + fmt(d) + ' с'); });
+  L.push('————————————————————');
+  L.push('Старший по подъезду — Эржан');
+  var text = L.join('\n');
+  window._rep = text;
+  el('rep-out').innerHTML = '<div class="report-box">' + esc(text) + '</div><button class="btn btn-primary btn-full" style="margin-top:10px" onclick="copyReport()">Скопировать текст</button>';
+}
+
+function copyReport() {
+  var t = window._rep || '';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function() { toast('Скопировано'); }, function() { fallbackCopy(t); });
+  } else { fallbackCopy(t); }
+}
+function fallbackCopy(t) {
+  var ta = document.createElement('textarea');
+  ta.value = t; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); toast('Скопировано'); } catch (e) { toast('Не удалось скопировать'); }
+  document.body.removeChild(ta);
+}
+
+// ====================================================================
+// ЗАПУСК
+// ====================================================================
+el('tx-date').value = today();
+el('c-date').value = today();
+syncCat();
+renderHome();
+loadAll().then(renderHome);
+
+setInterval(function() {
+  if (el('s-home').classList.contains('active')) {
+    loadAll().then(function() { if (el('s-home').classList.contains('active')) renderHome(); });
+  } else if (el('s-apt-view').classList.contains('active') && currentApt) {
+    loadAll().then(function() { if (el('s-apt-view').classList.contains('active')) showAptView(currentApt); });
+  }
+}, 30000);
+</script>
+</body>
+</html>
